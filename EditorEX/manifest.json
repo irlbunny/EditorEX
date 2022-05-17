@@ -1,0 +1,12 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "EditorEX",
+  "name": "EditorEX",
+  "author": "Kaitlyn",
+  "version": "0.0.1",
+  "description": "Editor EXtended",
+  "gameVersion": "1.22.0",
+  "dependsOn": {
+    "BSIPA": "^4.2.2"
+  }
+}
