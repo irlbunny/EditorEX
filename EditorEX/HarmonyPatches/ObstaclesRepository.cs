@@ -2,7 +2,6 @@
 using BeatmapEditor3D.DataModels;
 using HarmonyLib;
 using IntervalTree;
-using IPA.Utilities;
 using System.Collections.Generic;
 
 namespace EditorEX.HarmonyPatches
@@ -11,12 +10,10 @@ namespace EditorEX.HarmonyPatches
     [HarmonyPatch(typeof(ObstaclesRepository), "Add", typeof(ObstacleEditorData))]
     internal class ObstaclesRepositoryAdd
     {
-        private static bool Prefix(ObstaclesRepository __instance, ObstacleEditorData obstacle)
+        private static bool Prefix(ObstacleEditorData obstacle, IntervalTree<float, ObstacleEditorData> ____tree, IDictionary<BeatmapEditorObjectId, ObstacleEditorData> ____dictionary)
         {
-            var tree = __instance.GetField<IntervalTree<float, ObstacleEditorData>, ObstaclesRepository>("_tree");
-            var dictionary = __instance.GetField<IDictionary<BeatmapEditorObjectId, ObstacleEditorData>, ObstaclesRepository>("_dictionary");
-            tree.Add(obstacle.beat, obstacle.beat + (obstacle.duration < 0 ? -obstacle.duration : obstacle.duration), obstacle);
-            dictionary.Add(obstacle.id, obstacle);
+            ____tree.Add(obstacle.beat, obstacle.beat + (obstacle.duration < 0 ? -obstacle.duration : obstacle.duration), obstacle);
+            ____dictionary.Add(obstacle.id, obstacle);
             return false;
         }
     }

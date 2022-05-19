@@ -92,9 +92,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HarmonyPatches\ObstaclesRepository.cs" />
+    <Compile Include="HarmonyPatches\SpectrogramAwake.cs" />
+    <Compile Include="Installers\EXAppInstaller.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilities\SceneUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
@@ -110,11 +113,6 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Installers\" />
-    <Folder Include="Managers\" />
-    <Folder Include="Resources\" />
-    <Folder Include="UI\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

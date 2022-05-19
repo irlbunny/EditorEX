@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using EditorEX.Installers;
+using HarmonyLib;
 using IPA;
 using IPA.Config.Stores;
 using IPA.Loader;
@@ -21,14 +22,14 @@ namespace EditorEX
         {
             zenjector.UseLogger(logger);
 
-            Config config = conf.Generated<Config>();
+            Config.Instance = conf.Generated<Config>();
             zenjector.Install(Location.App, container =>
             {
-                container.BindInstance(config).AsSingle();
+                container.BindInstance(Config.Instance).AsSingle();
                 container.BindInstance(new UBinder<Plugin, PluginMetadata>(metadata));
             });
 
-            //zenjector.Install<EXEditorInstaller>(Location.App); // TODO: Editor
+            zenjector.Install<EXAppInstaller>(Location.App);
         }
 
         [OnEnable]
