@@ -15,7 +15,7 @@ namespace EditorEX
     public class Plugin
     {
         internal const string HARMONYID = "com.github.ItsKaitlyn03.EditorEX";
-        internal static Harmony HarmonyInstance { get; private set; } = new Harmony(HARMONYID);
+        internal static Harmony HarmonyInstance { get; private set; } = new(HARMONYID);
 
         [Init]
         public Plugin(IPALogger logger, IPAConfig conf, PluginMetadata metadata, Zenjector zenjector)

@@ -111,15 +111,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Filter\BeatmapsListViewControllerExtensions.cs" />
     <Compile Include="HarmonyPatches\ObstaclesRepository.cs" />
-    <Compile Include="HarmonyPatches\SearchField.cs" />
+    <Compile Include="HarmonyPatches\BeatmapsListViewController.cs" />
     <Compile Include="HarmonyPatches\SpectrogramAwake.cs" />
     <Compile Include="Installers\EXAppInstaller.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Filter\BeatmapSortInfo.cs" />
     <Compile Include="Utilities\SceneUtil.cs" />
-    <Compile Include="Utilities\UIUtils.cs" />
+    <Compile Include="Utilities\UIUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
@@ -136,7 +138,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Assets\icon.png" />
+    <EmbeddedResource Include="Resources\filter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
