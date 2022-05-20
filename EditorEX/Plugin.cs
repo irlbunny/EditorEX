@@ -29,7 +29,7 @@ namespace EditorEX
                 container.BindInstance(new UBinder<Plugin, PluginMetadata>(metadata));
             });
 
-            zenjector.Install<EXAppInstaller>(Location.App);
+            zenjector.Install<EXGameCoreInstaller>(Location.GameCore);
         }
 
         [OnEnable]

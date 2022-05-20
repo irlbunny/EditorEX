@@ -14,6 +14,7 @@ namespace EditorEX
 #pragma warning restore CS8632
 
         public virtual bool HideEnvironmentSpectrograms { get; set; } = true;
+        public virtual bool UseEnvironmentColors { get; set; } = true;
 
         public virtual void Changed()
         {
