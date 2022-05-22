@@ -217,8 +217,7 @@ namespace EditorEX.Views
             for (int i = firstSpectrogram; i < lastSpectrogram; i++)
             {
                 var z = helper.TimeToPosition(((float)(i * this.secondsPerChunk)) - startTime);
-                var pos = this.spectrogramChunks[i].transform.localPosition;
-                this.spectrogramChunks[i].transform.localPosition = new Vector3(-7f, pos.y, z + (helper.timeToZDistanceScale * ((float)this.secondsPerChunk) / 2f));
+                this.spectrogramChunks[i].transform.localPosition = new Vector3(-7f, 0.01f, z + (helper.timeToZDistanceScale * ((float)this.secondsPerChunk) / 2f));
                 this.spectrogramChunks[i].transform.localScale = new Vector3(helper.timeToZDistanceScale * ((float)this.secondsPerChunk) / 10f, 1f, 0.5f);
                 this.spectrogramChunks[i].SetActive(true);
             }
