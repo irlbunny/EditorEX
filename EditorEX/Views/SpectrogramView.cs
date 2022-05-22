@@ -33,26 +33,28 @@ namespace EditorEX.Views
             // Refrenced implementation: https://github.com/Caeden117/ChroMapper/blob/98ce36c6471c56cf252214f0c9825f23c3f5265c/Assets/__Scripts/MapEditor/Audio/AudioManager.cs#L81
             this.audioClip = audioClip;
 
+            // Average all channels together into one set of samples
             float[] multiChannelSamples = new float[audioClip.samples * audioClip.channels];
             this.audioClip.GetData(multiChannelSamples, 0);
-
             double[] processedSamples = new double[audioClip.samples];
             for (var i = 0; i < multiChannelSamples.Length; i++)
                 processedSamples[i / audioClip.channels] = multiChannelSamples[i] / this.audioClip.channels;
 
+            // Basic AudioClip information
             var numChannels = audioClip.channels;
             var numTotalSamples = audioClip.samples;
             var clipLength = audioClip.length;
             var sampleRate = audioClip.frequency;
 
-            var waveformChunks = (int)Math.Ceiling(clipLength / secondsPerChunk);
+            // Number of "chunks" or texture segments produced
+            var waveformChunks = (int)Math.Ceiling(clipLength / this.secondsPerChunk);
 
-            // non-3d
             var samples = (int)sampleCount / 2;
             var samplesPerChunk = sampleRate * secondsPerChunk;
             var columnsPerChunk = (int)samplesPerChunk / samples;
             var sampleOffset = samplesPerChunk / columnsPerChunk;
-            // init band volumes (waveform)
+
+            // Initialize texture data
             var waveformBandVolumes = new float[columnsPerChunk * waveformChunks][];
             var waveformBandColors = new Texture2D[waveformChunks];
             var waveformBandCData = new NativeArray<Color32>[waveformChunks];
@@ -68,7 +70,7 @@ namespace EditorEX.Views
 
             var hzStep = sampleRate / (float)sampleCount;
 
-            // Do FFT
+            // Perform the Fast Fourier Transform
             var fftSize = sampleCount;
             var fft = new FFT();
             fft.Initialize(fftSize);
@@ -91,13 +93,17 @@ namespace EditorEX.Views
                     if ((i * sampleOffset) + fftSize > processedSamples.Length)
                     {
                         waveformBandVolumes[i] = new float[bins + 1];
-                        // Color is lowest on gradient
-                        bandColors[k] = Enumerable.Repeat(Color.black, (int)bins + 1)
-                            .ToArray();
 
+                        // There are no more samples, generate a blank texture
+                        var r = Inferno.data[0, 0];
+                        var g = Inferno.data[0, 1];
+                        var b = Inferno.data[0, 2];
+                        bandColors[k] = Enumerable.Repeat(new Color(r, g, b), (int)bins + 1)
+                            .ToArray();
                         continue;
                     }
 
+                    // Load the samples into a chunk for FFT
                     Buffer.BlockCopy(processedSamples, (int)(i * sampleOffset) * sizeof(double), sampleChunk, 0, curSampleSize * sizeof(double));
 
                     var scaledSpectrumChunk = DSP.Math.Multiply(sampleChunk, windowCoefs);
@@ -120,18 +126,16 @@ namespace EditorEX.Views
                     bandColors[k] = waveformBandVolumes[i].Select(it =>
                     {
                         var lerp = Mathf.InverseLerp(0, 2, it);
-                        var r = Inferno.data[(int)Math.Round(256f * lerp), 0];
-                        var g = Inferno.data[(int)Math.Round(256f * lerp), 1];
-                        var b = Inferno.data[(int)Math.Round(256f * lerp), 2];
+                        var r = Inferno.data[(int)Math.Round(255f * lerp), 0];
+                        var g = Inferno.data[(int)Math.Round(255f * lerp), 1];
+                        var b = Inferno.data[(int)Math.Round(255f * lerp), 2];
                         return new Color(r, g, b, 1.0f);
                     }).ToArray();
                 }
 
-
                 var data = waveformBandCData[chunkId];
 
                 var index = 0;
-                //if (bandColors == null) return; // Can't be done, but should mean error?
                 for (var y = 0; y < bandColors[0].Length; y++)
                 {
                     for (var x = 0; x < bandColors.Length; x++)
@@ -143,13 +147,10 @@ namespace EditorEX.Views
                 // get chunk
                 Array.Copy(waveformBandVolumes, chunkId * columnsPerChunk, toRender, 0, columnsPerChunk);
                 waveformBandColors[chunkId].Apply(false);
-                //
             }
 
             this.bandColors = waveformBandColors;
         }
-
-        public void ClearView() { }
 
         static AccessTools.FieldRef<BeatmapObjectPlacementHelper, IBeatmapDataModel> dataModelRef =
         AccessTools.FieldRefAccess<BeatmapObjectPlacementHelper, IBeatmapDataModel>("_beatmapDataModel");
@@ -160,6 +161,7 @@ namespace EditorEX.Views
             {
                 return;
             }
+            // startTimeBeats is 5 beats behind the current beat
             float startTime = dataModelRef(helper).bpmData.BeatToTime(startTimeBeats + 5);
             float endTime = dataModelRef(helper).bpmData.BeatToTime(endTimeBeats);
 
@@ -191,6 +193,8 @@ namespace EditorEX.Views
                         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Plane);
                         obj.GetComponent<MeshRenderer>().material = newMat;
                         obj.transform.Rotate(new Vector3(0, 90, 0));
+
+                        // Primitive Plane is 10x10, changes the size to (5 seconds of distance)x5
                         obj.transform.localScale = new Vector3(helper.timeToZDistanceScale * 5f / 10f, 1f, 0.5f);
 
                         obj.SetActive(false);
