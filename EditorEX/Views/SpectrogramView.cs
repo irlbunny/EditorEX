@@ -146,7 +146,7 @@ namespace EditorEX.Views
                 var toRender = new float[columnsPerChunk][];
                 // get chunk
                 Array.Copy(waveformBandVolumes, chunkId * columnsPerChunk, toRender, 0, columnsPerChunk);
-                waveformBandColors[chunkId].Apply(false);
+                waveformBandColors[chunkId].Apply(true);
             }
 
             this.bandColors = waveformBandColors;
@@ -165,8 +165,8 @@ namespace EditorEX.Views
             float startTime = dataModelRef(helper).bpmData.BeatToTime(startTimeBeats + 5);
             float endTime = dataModelRef(helper).bpmData.BeatToTime(endTimeBeats);
 
-            var firstSpectrogram = (int)Math.Floor((startTime) / 5) - 1;
-            var lastSpectrogram = (int)Math.Ceiling(endTime / 5);
+            var firstSpectrogram = (int)Math.Floor((startTime) / this.secondsPerChunk) - 1;
+            var lastSpectrogram = (int)Math.Ceiling(endTime / this.secondsPerChunk);
 
             firstSpectrogram = Math.Max(0, firstSpectrogram);
             lastSpectrogram = Math.Min(lastSpectrogram, this.bandColors.Length - 1);
@@ -188,6 +188,7 @@ namespace EditorEX.Views
                     for (int i = 0; i < this.bandColors.Length; i++)
                     {
                         var newMat = Material.Instantiate(baseMaterial);
+                        newMat.color = new Color(1, 1, 1, 0);
                         newMat.SetTexture("_Tex", this.bandColors[i]);
 
                         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -195,7 +196,7 @@ namespace EditorEX.Views
                         obj.transform.Rotate(new Vector3(0, 90, 0));
 
                         // Primitive Plane is 10x10, changes the size to (5 seconds of distance)x5
-                        obj.transform.localScale = new Vector3(helper.timeToZDistanceScale * 5f / 10f, 1f, 0.5f);
+                        obj.transform.localScale = new Vector3(helper.timeToZDistanceScale * ((float)this.secondsPerChunk) / 10f, 1f, 0.5f);
 
                         obj.SetActive(false);
 
@@ -215,10 +216,10 @@ namespace EditorEX.Views
             }
             for (int i = firstSpectrogram; i < lastSpectrogram; i++)
             {
-                var z = helper.TimeToPosition(((float)(i * 5)) - startTime);
+                var z = helper.TimeToPosition(((float)(i * this.secondsPerChunk)) - startTime);
                 var pos = this.spectrogramChunks[i].transform.localPosition;
-                this.spectrogramChunks[i].transform.localPosition = new Vector3(-7f, pos.y, z + (helper.timeToZDistanceScale * 5f / 2f));
-                this.spectrogramChunks[i].transform.localScale = new Vector3(helper.timeToZDistanceScale * 5f / 10f, 1f, 0.5f);
+                this.spectrogramChunks[i].transform.localPosition = new Vector3(-7f, pos.y, z + (helper.timeToZDistanceScale * ((float)this.secondsPerChunk) / 2f));
+                this.spectrogramChunks[i].transform.localScale = new Vector3(helper.timeToZDistanceScale * ((float)this.secondsPerChunk) / 10f, 1f, 0.5f);
                 this.spectrogramChunks[i].SetActive(true);
             }
         }
