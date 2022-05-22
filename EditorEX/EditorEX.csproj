@@ -41,14 +41,14 @@
     <DisableZipRelease>True</DisableZipRelease>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <Private>False</Private>
+    <Reference Include="0Harmony">
       <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
+      <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="BeatmapCore, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <Private>False</Private>
+    <Reference Include="BeatmapCore">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
+      <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="BeatmapEditor3D, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -71,9 +71,9 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IntervalTree.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="SiraUtil, Version=3.0.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <Private>False</Private>
+    <Reference Include="SiraUtil">
       <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
+      <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System" />
@@ -94,6 +94,11 @@
     <Reference Include="UnityEngine">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
@@ -117,11 +122,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Filter\BeatmapsListViewControllerExtensions.cs" />
+    <Compile Include="HarmonyPatches\BeatBasedItemContainer.cs" />
+    <Compile Include="HarmonyPatches\ToggleZenModeCommand.cs" />
+    <Compile Include="HarmonyPatches\EditBeatmapLevelViewController.cs" />
     <Compile Include="HarmonyPatches\NoteTypeHelper.cs" />
     <Compile Include="HarmonyPatches\ObstaclesRepository.cs" />
     <Compile Include="HarmonyPatches\BeatmapsListViewController.cs" />
     <Compile Include="HarmonyPatches\SpectrogramAwake.cs" />
     <Compile Include="Installers\EXGameCoreInstaller.cs" />
+    <Compile Include="Lib\DSPLib.cs" />
+    <Compile Include="Managers\SpectrogramViewInstanceManager.cs" />
     <Compile Include="Managers\ColorManagerInstanceManager.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Config.cs" />
@@ -129,6 +139,8 @@
     <Compile Include="Filter\BeatmapSortInfo.cs" />
     <Compile Include="Utilities\SceneUtil.cs" />
     <Compile Include="Utilities\UIUtil.cs" />
+    <Compile Include="Views\SpectrogramColors\Inferno.cs" />
+    <Compile Include="Views\SpectrogramView.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
@@ -147,5 +159,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\filter.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
