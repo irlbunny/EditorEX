@@ -11,6 +11,7 @@ using UnityEngine;
 using DSPLib;
 using EditorEX.Views.SpectrogramColors;
 using Unity.Collections;
+using System.Reflection;
 
 namespace EditorEX.Views
 {
@@ -23,7 +24,7 @@ namespace EditorEX.Views
 
         private bool visible = true;
 
-        public readonly float secondsPerChunk  = 5;
+        public readonly float secondsPerChunk = 5;
         private readonly uint sampleCount = 512u;
 
         public SpectrogramView(AudioClip audioClip)
@@ -155,7 +156,7 @@ namespace EditorEX.Views
 
         public void RefreshView(float startTimeBeats, float endTimeBeats, BeatmapObjectPlacementHelper helper)
         {
-            if(!this.visible)
+            if (!this.visible)
             {
                 return;
             }
@@ -172,32 +173,25 @@ namespace EditorEX.Views
             {
                 if (this.bandColors != null)
                 {
-                    var baseMaterial = new Material(Shader.Find("Sprites/Default"));
-                    var blackMaterial = new Material(Shader.Find("Custom/SimpleLit"));
-                    blackMaterial.SetColor("_Color", Color.black);
-                    blackMaterial.renderQueue = 49;
+                    // Load asset bundle for the spectrogram material
+                    AssetBundle myAssetBundle;
+                    var bundle = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "EditorEX.Resources.spectrogram.bundle");
+                    myAssetBundle = AssetBundle.LoadFromMemory(bundle);
+
+                    var baseMaterial = myAssetBundle.LoadAsset<Material>("spectrogram");
+                    myAssetBundle.Unload(false);
+                    // End AssetBundle stuff
 
                     this.spectrogramChunks = new GameObject[this.bandColors.Length];
                     for (int i = 0; i < this.bandColors.Length; i++)
                     {
                         var newMat = Material.Instantiate(baseMaterial);
-                        newMat.SetTexture("_MainTex", this.bandColors[i]);
-                        newMat.SetColor("_Color", new Color(1, 1, 1, 0.1f));
-                        newMat.renderQueue = 50;
+                        newMat.SetTexture("_Tex", this.bandColors[i]);
 
                         GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Plane);
                         obj.GetComponent<MeshRenderer>().material = newMat;
                         obj.transform.Rotate(new Vector3(0, 90, 0));
                         obj.transform.localScale = new Vector3(helper.timeToZDistanceScale * 5f / 10f, 1f, 0.5f);
-
-                        GameObject backdrop = GameObject.CreatePrimitive(PrimitiveType.Plane);
-                        backdrop.GetComponent<MeshRenderer>().material = blackMaterial;
-                        //obj.transform.localScale = new Vector3(1, 1, helper.timeToZDistanceScale * 5);
-
-                        backdrop.transform.position = new Vector3(0, -0.01f, 0f);
-                        backdrop.transform.localScale = new Vector3(0.5f, 1f, helper.timeToZDistanceScale * 5f / 10f);
-
-                        backdrop.transform.SetParent(obj.transform);
 
                         obj.SetActive(false);
 
