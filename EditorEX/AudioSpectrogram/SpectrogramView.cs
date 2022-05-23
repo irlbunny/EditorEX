@@ -13,7 +13,7 @@ namespace EditorEX.AudioSpectrogram
 {
     // NOTE: This code is heavily based upon ChroMapper's spectrogram generation.
     // Referenced implementation: https://github.com/Caeden117/ChroMapper/blob/98ce36c6471c56cf252214f0c9825f23c3f5265c/Assets/__Scripts/MapEditor/Audio/AudioManager.cs#L81
-    public class SpectrogramView : IDisposable
+    internal class SpectrogramView : IDisposable
     {
         private static AccessTools.FieldRef<BeatmapObjectPlacementHelper, IBeatmapDataModel> _beatmapDataModelAccessor =
             AccessTools.FieldRefAccess<BeatmapObjectPlacementHelper, IBeatmapDataModel>("_beatmapDataModel");
@@ -23,14 +23,16 @@ namespace EditorEX.AudioSpectrogram
 
         private const int GRADIENT_FACTOR = 25;
 
-        private bool _visible = true;
-
         private AudioClip _audioClip;
 
         private IColorData _colorData;
         private Texture2D[] _bandColors;
+
+        private bool _visible = true;
+
         private GameObject[] _spectrogramChunks;
 
+        public GameObject Container { get; private set; }
         public static SpectrogramView Instance { get; set; }
 
         public SpectrogramView(AudioClip audioClip)
@@ -87,7 +89,7 @@ namespace EditorEX.AudioSpectrogram
 
             var scalingConstant = 8d / fftSize;
             for (var y = 0; y < bins; y++)
-                compFactors[y] = Math.Sqrt((y + 0.25) * scalingConstant);
+                compFactors[y] = Math.Sqrt((y + 0.25d) * scalingConstant);
 
             for (var chunkId = 0; chunkId < waveformChunks; chunkId++)
             {
@@ -163,7 +165,7 @@ namespace EditorEX.AudioSpectrogram
                 return;
 
             // startTimeBeats is 5 beats behind the current beat.
-            var startTime = _beatmapDataModelAccessor(beatmapObjectPlacementHelper).bpmData.BeatToTime(startTimeBeats + 5);
+            var startTime = _beatmapDataModelAccessor(beatmapObjectPlacementHelper).bpmData.BeatToTime(startTimeBeats + 5f);
             var endTime = _beatmapDataModelAccessor(beatmapObjectPlacementHelper).bpmData.BeatToTime(endTimeBeats);
 
             var firstSpectrogram = (int) Math.Floor(startTime / SECONDS_PER_CHUNK) - 1;
@@ -172,27 +174,38 @@ namespace EditorEX.AudioSpectrogram
             firstSpectrogram = Math.Max(0, firstSpectrogram);
             lastSpectrogram = Math.Min(lastSpectrogram, _bandColors.Length - 1);
 
-            if (_spectrogramChunks == null && _bandColors != null)
+            if (Container == null && _spectrogramChunks == null && _bandColors != null)
             {
                 // Load AssetBundle for the Spectrogram material.
                 var spectrogramBundle = AssetBundle.LoadFromMemory(BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "EditorEX.Resources.spectrogram.bundle"));
                 var baseMaterial = spectrogramBundle.LoadAsset<Material>("spectrogram");
                 spectrogramBundle.Unload(false);
-                
+
+                Container = new GameObject("SpectrogramContainer");
+
+                // Create a clone of BeatmapObjectsContainer beatline.
+                var beatLine = GameObject.Find("Wrapper/BeatmapObjectsContainer/BeatGridContainer/CurrentBeatline");
+                var newBeatLine = UnityEngine.Object.Instantiate(beatLine);
+                newBeatLine.transform.parent = Container.transform;
+                newBeatLine.transform.localPosition = new(0f, .02f, 0f);
+                newBeatLine.transform.transform.localScale = new(5f, 1f, 1f);
+
                 _spectrogramChunks = new GameObject[_bandColors.Length];
 
                 for (var i = 0; i < _bandColors.Length; i++)
                 {
                     var newMaterial = UnityEngine.Object.Instantiate(baseMaterial);
-                    newMaterial.color = new Color(1, 1, 1, 0);
+                    newMaterial.color = new(1f, 1f, 1f, 0f);
                     newMaterial.SetTexture("_Tex", _bandColors[i]);
 
                     var spectrogramChunk = GameObject.CreatePrimitive(PrimitiveType.Plane);
                     spectrogramChunk.GetComponent<MeshRenderer>().material = newMaterial;
-                    spectrogramChunk.transform.Rotate(new Vector3(0, 90, 0));
+                    spectrogramChunk.transform.parent = Container.transform;
+                    spectrogramChunk.transform.Rotate(new(0f, 90f, 0f));
+                    spectrogramChunk.name = $"SpectrogramChunk{i}";
 
                     // Primitive Plane is 10x10, changes the size to (5 seconds of distance) x 5.
-                    spectrogramChunk.transform.localScale = new Vector3(beatmapObjectPlacementHelper.timeToZDistanceScale * (SECONDS_PER_CHUNK) / 10f, 1f, 0.5f);
+                    spectrogramChunk.transform.localScale = new(beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 10f, 1f, .5f);
                     spectrogramChunk.SetActive(false);
 
                     _spectrogramChunks[i] = spectrogramChunk;
@@ -207,8 +220,8 @@ namespace EditorEX.AudioSpectrogram
             for (var i = firstSpectrogram; i < lastSpectrogram; i++)
             {
                 var z = beatmapObjectPlacementHelper.TimeToPosition(((float) (i * SECONDS_PER_CHUNK)) - startTime);
-                _spectrogramChunks[i].transform.localPosition = new Vector3(-7f, .01f, z + (beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 2f));
-                _spectrogramChunks[i].transform.localScale = new Vector3(beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 10f, 1f, .5f);
+                _spectrogramChunks[i].transform.localPosition = new(0f, .01f, z + (beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 2f));
+                _spectrogramChunks[i].transform.localScale = new(beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 10f, 1f, -.5f);
                 _spectrogramChunks[i].SetActive(true);
             }
         }

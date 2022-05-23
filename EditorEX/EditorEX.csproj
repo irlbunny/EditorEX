@@ -127,6 +127,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioSpectrogram\HarmonyPatches\BeatBasedItemContainer.cs" />
+    <Compile Include="AudioSpectrogram\HarmonyPatches\BeatGridContainer.cs" />
     <Compile Include="HarmonyPatches\BeatmapProjectManager.cs" />
     <Compile Include="AudioSpectrogram\HarmonyPatches\ToggleZenModeCommand.cs" />
     <Compile Include="AudioSpectrogram\HarmonyPatches\EditBeatmapLevelViewController.cs" />
