@@ -1,4 +1,5 @@
 ﻿using EditorEX.Managers;
+using EditorEX.Views;
 using Zenject;
 
 namespace EditorEX.Installers
