@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EditorEX.Filter
+namespace EditorEX.BeatmapFilter
 {
     internal static class BeatmapsListViewControllerExtensions
     {

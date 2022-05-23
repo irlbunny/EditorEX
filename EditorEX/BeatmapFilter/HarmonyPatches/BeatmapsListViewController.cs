@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using BeatmapEditor3D.DataModels;
 using IPA.Utilities;
 using TMPro;
-using EditorEX.Filter;
+using EditorEX.BeatmapFilter;
 
 namespace EditorEX.HarmonyPatches
 {

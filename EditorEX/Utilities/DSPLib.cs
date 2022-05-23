@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 
 // =====[ Revision History ]==========================================
@@ -12,7 +12,6 @@ using System.Numerics;
 //                  Added UnwrapPhaseDegrees() and UnwrapPhaseRadians() to Analysis Class.
 // 04Jul17 - 1.03 - Added zero or negative check to all Log10 operations.
 // 15Oct17 - 1.03.1 - Slight interoperability correction to V1.03, same results, different design pattern.
-// 27Aug21 - 1.03.2(?) - Enforced ChroMapper .editorconfig
 //
 
 
@@ -60,21 +59,21 @@ namespace DSPLib
         #region Properties
 
         private double mDFTScale;       // DFT ONLY Scale Factor
-        private uint mLengthTotal;    // mN + mZp
-        private uint mLengthHalf;     // (mN + mZp) / 2
+        private UInt32 mLengthTotal;    // mN + mZp
+        private UInt32 mLengthHalf;     // (mN + mZp) / 2
 
         private double[,] mCosTerm;      // Caching of multiplication terms to save time
         private double[,] mSinTerm;      // on smaller DFT's
         private bool mOutOfMemory;       // True = Caching ran out of memory.
 
-
+        
         /// <summary>
         /// Read only Boolean property. True meas the currently defined DFT is using cached memory to speed up calculations.
         /// </summary>
         public bool IsUsingCached
         {
             private set { }
-            get => !mOutOfMemory;
+            get { return !mOutOfMemory; }
         }
 
         #endregion
@@ -88,26 +87,26 @@ namespace DSPLib
         /// <param name="inputDataLength"></param>
         /// <param name="zeroPaddingLength"></param>
         /// <param name="forceNoCache">True will force the DFT to not use pre-calculated caching.</param>
-        public void Initialize(uint inputDataLength, uint zeroPaddingLength = 0, bool forceNoCache = false)
+        public void Initialize(UInt32 inputDataLength, UInt32 zeroPaddingLength = 0, bool forceNoCache = false)
         {
             // Save the sizes for later
             mLengthTotal = inputDataLength + zeroPaddingLength;
             mLengthHalf = (mLengthTotal / 2) + 1;
 
             // Set the overall scale factor for all the terms
-            mDFTScale = Math.Sqrt(2) / (inputDataLength + zeroPaddingLength);                 // Natural DFT Scale Factor                                           // Window Scale Factor
-            mDFTScale *= (inputDataLength + zeroPaddingLength) / (double)inputDataLength;   // Account For Zero Padding                           // Zero Padding Scale Factor
+            mDFTScale = Math.Sqrt(2) / (double)(inputDataLength + zeroPaddingLength);                 // Natural DFT Scale Factor                                           // Window Scale Factor
+            mDFTScale *= ((double)(inputDataLength + zeroPaddingLength)) / (double)inputDataLength;   // Account For Zero Padding                           // Zero Padding Scale Factor
 
 
-            if (forceNoCache)
+            if (forceNoCache == true)
             {
-                // If optional No Cache - just flag that the cache failed
+                // If optional No Cache - just flag that the cache failed 
                 // then the routines will use the brute force DFT methods.
                 mOutOfMemory = true;
                 return;
             }
 
-            // Try to make pre-calculated sin/cos arrays. If not enough memory, then
+            // Try to make pre-calculated sin/cos arrays. If not enough memory, then 
             // use a brute force DFT.
             // Note: pre-calculation speeds the DFT up by about 5X (on a core i7)
             mOutOfMemory = false;
@@ -116,18 +115,18 @@ namespace DSPLib
                 mCosTerm = new double[mLengthTotal, mLengthTotal];
                 mSinTerm = new double[mLengthTotal, mLengthTotal];
 
-                var scaleFactor = 2.0 * Math.PI / mLengthTotal;
+                double scaleFactor = 2.0 * Math.PI / mLengthTotal;
 
                 //Parallel.For(0, mLengthHalf, (j) =>
-                for (var j = 0; j < mLengthHalf; j++)
+                for (int j = 0; j < mLengthHalf; j++)
                 {
-                    var a = j * scaleFactor;
-                    for (var k = 0; k < mLengthTotal; k++)
+                    double a = j * scaleFactor;
+                    for (int k = 0; k < mLengthTotal; k++)
                     {
                         mCosTerm[j, k] = Math.Cos(a * k) * mDFTScale;
                         mSinTerm[j, k] = Math.Sin(a * k) * mDFTScale;
                     }
-                }
+                } //);
             }
             catch (OutOfMemoryException)
             {
@@ -148,7 +147,7 @@ namespace DSPLib
             Debug.Assert(timeSeries.Length <= mLengthTotal, "The input timeSeries length was greater than the total number of points that was initialized. DFT.Exectue()");
 
             // Account for zero padding in size of DFT input array
-            var totalInputData = new double[mLengthTotal];
+            double[] totalInputData = new double[mLengthTotal];
             Array.Copy(timeSeries, totalInputData, timeSeries.Length);
 
             Complex[] output;
@@ -169,25 +168,25 @@ namespace DSPLib
         /// <returns>Complex[] result</returns>
         private Complex[] Dft(double[] timeSeries)
         {
-            var n = mLengthTotal;
-            var m = mLengthHalf;
-            var re = new double[m];
-            var im = new double[m];
-            var result = new Complex[m];
-            var sf = 2.0 * Math.PI / n;
+            UInt32 n = mLengthTotal;
+            UInt32 m = mLengthHalf;
+            double[] re = new double[m];
+            double[] im = new double[m];
+            Complex[] result = new Complex[m];
+            double sf = 2.0 * Math.PI / n;
 
-            // Parallel.For(0, m, (j) =>
-            for (uint j = 0; j < m; j++)
+            Parallel.For(0, m, (j) =>
+            //for (UInt32 j = 0; j < m; j++)
             {
-                var a = j * sf;
-                for (uint k = 0; k < n; k++)
+                double a = j * sf;
+                for (UInt32 k = 0; k < n; k++)
                 {
                     re[j] += timeSeries[k] * Math.Cos(a * k) * mDFTScale;
                     im[j] -= timeSeries[k] * Math.Sin(a * k) * mDFTScale;
                 }
 
                 result[j] = new Complex(re[j], im[j]);
-            };
+            });
 
             // DC and Fs/2 Points are scaled differently, since they have only a real part
             result[0] = new Complex(result[0].Real / Math.Sqrt(2), 0.0);
@@ -205,22 +204,22 @@ namespace DSPLib
         /// <returns>Complex[] result</returns>
         private Complex[] DftCached(double[] timeSeries)
         {
-            var n = mLengthTotal;
-            var m = mLengthHalf;
-            var re = new double[m];
-            var im = new double[m];
-            var result = new Complex[m];
+            UInt32 n = mLengthTotal;
+            UInt32 m = mLengthHalf;
+            double[] re = new double[m];
+            double[] im = new double[m];
+            Complex[] result = new Complex[m];
 
-            //Parallel.For(0, m, (j) =>
-            for (uint j = 0; j < m; j++)
+            Parallel.For(0, m, (j) =>
+            //for (UInt32 j = 0; j < m; j++)
             {
-                for (uint k = 0; k < n; k++)
+                for (UInt32 k = 0; k < n; k++)
                 {
                     re[j] += timeSeries[k] * mCosTerm[j, k];
                     im[j] -= timeSeries[k] * mSinTerm[j, k];
                 }
                 result[j] = new Complex(re[j], im[j]);
-            };
+            });
 
             // DC and Fs/2 Points are scaled differently, since they have only a real part
             result[0] = new Complex(result[0].Real / Math.Sqrt(2), 0.0);
@@ -243,12 +242,12 @@ namespace DSPLib
         /// <returns></returns>
         public double[] FrequencySpan(double samplingFrequencyHz)
         {
-            var points = mLengthHalf;
-            var result = new double[points];
-            var stopValue = samplingFrequencyHz / 2.0;
-            var increment = stopValue / (points - 1.0);
+            UInt32 points = mLengthHalf;
+            double[] result = new double[points];
+            double stopValue = samplingFrequencyHz / 2.0;
+            double increment = stopValue / ((double)points - 1.0);
 
-            for (uint i = 0; i < points; i++)
+            for (UInt32 i = 0; i < points; i++)
                 result[i] += increment * i;
 
             return result;
@@ -272,12 +271,12 @@ namespace DSPLib
      *      Fast C# FFT - Copyright (c) 2010 Gerald T. Beauregard
      *
      * Changes to: Interface, scaling, zero padding, return values.
-     * Change to .NET Complex output types and integrated with my DSP Library.
+     * Change to .NET Complex output types and integrated with my DSP Library. 
      * Note: Complex Number Type requires .NET >= 4.0
-     *
+     * 
      * These changes as noted above Copyright (c) 2016 Steven C. Hageman
      *
-     *
+     * 
      * Permission is hereby granted, free of charge, to any person obtaining a copy
      * of this software and associated documentation files (the "Software"), to
      * deal in the Software without restriction, including without limitation the
@@ -301,8 +300,6 @@ namespace DSPLib
     /// <summary>
     /// FFT Base Class
     /// </summary>
-    [SuppressMessage("Style", "IDE0047:Remove unnecessary parentheses",
-        Justification = "External Library, should not be enforced by editorconfig")]
     public class FFT
     {
         /// <summary>
@@ -313,19 +310,19 @@ namespace DSPLib
         #region Private Properties
 
         private double mFFTScale = 1.0;
-        private uint mLogN = 0;       // log2 of FFT size
-        private uint mN = 0;          // Time series length
-        private uint mLengthTotal;    // mN + mZp
-        private uint mLengthHalf;     // (mN + mZp) / 2
+        private UInt32 mLogN = 0;       // log2 of FFT size
+        private UInt32 mN = 0;          // Time series length
+        private UInt32 mLengthTotal;    // mN + mZp
+        private UInt32 mLengthHalf;     // (mN + mZp) / 2
         private FFTElement[] mX;        // Vector of linked list elements
 
         // Element for linked list to store input/output data.
         private class FFTElement
         {
-            public double Re = 0.0;     // Real component
-            public double Im = 0.0;     // Imaginary component
-            public FFTElement Next;     // Next element in linked list
-            public uint RevTgt;       // Target position post bit-reversal
+            public double re = 0.0;     // Real component
+            public double im = 0.0;     // Imaginary component
+            public FFTElement next;     // Next element in linked list
+            public UInt32 revTgt;       // Target position post bit-reversal
         }
 
         #endregion
@@ -337,15 +334,15 @@ namespace DSPLib
         /// </summary>
         /// <param name="inputDataLength"></param>
         /// <param name="zeroPaddingLength"></param>
-        public void Initialize(uint inputDataLength, uint zeroPaddingLength = 0)
+        public void Initialize(UInt32 inputDataLength, UInt32 zeroPaddingLength = 0)
         {
             mN = inputDataLength;
 
             // Find the power of two for the total FFT size up to 2^32
-            var foundIt = false;
+            bool foundIt = false;
             for (mLogN = 1; mLogN <= 32; mLogN++)
             {
-                var n = Math.Pow(2.0, mLogN);
+                double n = Math.Pow(2.0, mLogN);
                 if ((inputDataLength + zeroPaddingLength) == n)
                 {
                     foundIt = true;
@@ -361,21 +358,21 @@ namespace DSPLib
             mLengthHalf = (mLengthTotal / 2) + 1;
 
             // Set the overall scale factor for all the terms
-            mFFTScale = Math.Sqrt(2) / mLengthTotal;                // Natural FFT Scale Factor                                           // Window Scale Factor
-            mFFTScale *= mLengthTotal / (double)inputDataLength;    // Zero Padding Scale Factor
+            mFFTScale = Math.Sqrt(2) / (double)(mLengthTotal);                // Natural FFT Scale Factor                                           // Window Scale Factor
+            mFFTScale *= ((double)mLengthTotal) / (double)inputDataLength;    // Zero Padding Scale Factor
 
             // Allocate elements for linked list of complex numbers.
             mX = new FFTElement[mLengthTotal];
-            for (uint k = 0; k < (mLengthTotal); k++)
+            for (UInt32 k = 0; k < (mLengthTotal); k++)
                 mX[k] = new FFTElement();
 
             // Set up "next" pointers.
-            for (uint k = 0; k < (mLengthTotal) - 1; k++)
-                mX[k].Next = mX[k + 1];
+            for (UInt32 k = 0; k < (mLengthTotal) - 1; k++)
+                mX[k].next = mX[k + 1];
 
             // Specify target for bit reversal re-ordering.
-            for (uint k = 0; k < (mLengthTotal); k++)
-                mX[k].RevTgt = BitReverse(k, mLogN);
+            for (UInt32 k = 0; k < (mLengthTotal); k++)
+                mX[k].revTgt = BitReverse(k, mLogN);
         }
 
 
@@ -386,37 +383,37 @@ namespace DSPLib
         /// <returns>Complex[] Spectrum</returns>
         public Complex[] Execute(double[] timeSeries)
         {
-            var numFlies = mLengthTotal >> 1;  // Number of butterflies per sub-FFT
-            var span = mLengthTotal >> 1;      // Width of the butterfly
-            var spacing = mLengthTotal;        // Distance between start of sub-FFTs
-            uint wIndexStep = 1;          // Increment for twiddle table index
+            UInt32 numFlies = mLengthTotal >> 1;  // Number of butterflies per sub-FFT
+            UInt32 span = mLengthTotal >> 1;      // Width of the butterfly
+            UInt32 spacing = mLengthTotal;        // Distance between start of sub-FFTs
+            UInt32 wIndexStep = 1;          // Increment for twiddle table index
 
             Debug.Assert(timeSeries.Length <= mLengthTotal, "The input timeSeries length was greater than the total number of points that was initialized. FFT.Exectue()");
 
             // Copy data into linked complex number objects
-            var x = mX[0];
-            uint k = 0;
-            for (uint i = 0; i < mN; i++)
+            FFTElement x = mX[0];
+            UInt32 k = 0;
+            for (UInt32 i = 0; i < mN; i++)
             {
-                x.Re = timeSeries[k];
-                x.Im = 0.0;
-                x = x.Next;
+                x.re = timeSeries[k];
+                x.im = 0.0;
+                x = x.next;
                 k++;
             }
 
             // If zero padded, clean the 2nd half of the linked list from previous results
-            if (mN != mLengthTotal)
+            if( mN != mLengthTotal)
             {
-                for (var i = mN; i < mLengthTotal; i++)
+                for (UInt32 i = mN; i < mLengthTotal; i++)
                 {
-                    x.Re = 0.0;
-                    x.Im = 0.0;
-                    x = x.Next;
+                    x.re = 0.0; 
+                    x.im = 0.0;
+                    x = x.next;
                 }
             }
 
             // For each stage of the FFT
-            for (uint stage = 0; stage < mLogN; stage++)
+            for (UInt32 stage = 0; stage < mLogN; stage++)
             {
                 // Compute a multiplier factor for the "twiddle factors".
                 // The twiddle factors are complex unit vectors spaced at
@@ -425,48 +422,48 @@ namespace DSPLib
                 // implementations the twiddle factors are cached, but because
                 // array lookup is relatively slow in C#, it's just
                 // as fast to compute them on the fly.
-                var wAngleInc = wIndexStep * -2.0 * Math.PI / (mLengthTotal);
-                var wMulRe = Math.Cos(wAngleInc);
-                var wMulIm = Math.Sin(wAngleInc);
+                double wAngleInc = wIndexStep * -2.0 * Math.PI / (mLengthTotal);
+                double wMulRe = Math.Cos(wAngleInc);
+                double wMulIm = Math.Sin(wAngleInc);
 
-                for (uint start = 0; start < (mLengthTotal); start += spacing)
+                for (UInt32 start = 0; start < (mLengthTotal); start += spacing)
                 {
-                    var xTop = mX[start];
-                    var xBot = mX[start + span];
+                    FFTElement xTop = mX[start];
+                    FFTElement xBot = mX[start + span];
 
-                    var wRe = 1.0;
-                    var wIm = 0.0;
+                    double wRe = 1.0;
+                    double wIm = 0.0;
 
                     // For each butterfly in this stage
-                    for (uint flyCount = 0; flyCount < numFlies; ++flyCount)
+                    for (UInt32 flyCount = 0; flyCount < numFlies; ++flyCount)
                     {
                         // Get the top & bottom values
-                        var xTopRe = xTop.Re;
-                        var xTopIm = xTop.Im;
-                        var xBotRe = xBot.Re;
-                        var xBotIm = xBot.Im;
+                        double xTopRe = xTop.re;
+                        double xTopIm = xTop.im;
+                        double xBotRe = xBot.re;
+                        double xBotIm = xBot.im;
 
                         // Top branch of butterfly has addition
-                        xTop.Re = xTopRe + xBotRe;
-                        xTop.Im = xTopIm + xBotIm;
+                        xTop.re = xTopRe + xBotRe;
+                        xTop.im = xTopIm + xBotIm;
 
                         // Bottom branch of butterfly has subtraction,
                         // followed by multiplication by twiddle factor
                         xBotRe = xTopRe - xBotRe;
                         xBotIm = xTopIm - xBotIm;
-                        xBot.Re = (xBotRe * wRe) - (xBotIm * wIm);
-                        xBot.Im = (xBotRe * wIm) + (xBotIm * wRe);
+                        xBot.re = xBotRe * wRe - xBotIm * wIm;
+                        xBot.im = xBotRe * wIm + xBotIm * wRe;
 
                         // Advance butterfly to next top & bottom positions
-                        xTop = xTop.Next;
-                        xBot = xBot.Next;
+                        xTop = xTop.next;
+                        xBot = xBot.next;
 
                         // Update the twiddle factor, via complex multiply
                         // by unit vector with the appropriate angle
                         // (wRe + j wIm) = (wRe + j wIm) x (wMulRe + j wMulIm)
-                        var tRe = wRe;
-                        wRe = (wRe * wMulRe) - (wIm * wMulIm);
-                        wIm = (tRe * wMulIm) + (wIm * wMulRe);
+                        double tRe = wRe;
+                        wRe = wRe * wMulRe - wIm * wMulIm;
+                        wIm = tRe * wMulIm + wIm * wMulRe;
                     }
                 }
 
@@ -481,17 +478,17 @@ namespace DSPLib
             // linked list elements to a complex output vector & properly apply scale factors.
 
             x = mX[0];
-            var unswizzle = new Complex[mLengthTotal];
+            Complex[] unswizzle = new Complex[mLengthTotal];
             while (x != null)
             {
-                var target = x.RevTgt;
-                unswizzle[target] = new Complex(x.Re * mFFTScale, x.Im * mFFTScale);
-                x = x.Next;
+                UInt32 target = x.revTgt;
+                unswizzle[target] = new Complex(x.re * mFFTScale, x.im * mFFTScale);
+                x = x.next;
             }
 
             // Return 1/2 the FFT result from DC to Fs/2 (The real part of the spectrum)
             //UInt32 halfLength = ((mN + mZp) / 2) + 1;
-            var result = new Complex[mLengthHalf];
+            Complex[] result = new Complex[mLengthHalf];
             Array.Copy(unswizzle, result, mLengthHalf);
 
             // DC and Fs/2 Points are scaled differently, since they have only a real part
@@ -510,10 +507,10 @@ namespace DSPLib
          * @param   x       Number to be bit-reverse.
          * @param   numBits Number of bits in the number.
          */
-        private uint BitReverse(uint x, uint numBits)
+        private UInt32 BitReverse(UInt32 x, UInt32 numBits)
         {
-            uint y = 0;
-            for (uint i = 0; i < numBits; i++)
+            UInt32 y = 0;
+            for (UInt32 i = 0; i < numBits; i++)
             {
                 y <<= 1;
                 y |= x & 0x0001;
@@ -536,12 +533,12 @@ namespace DSPLib
         /// <returns></returns>
         public double[] FrequencySpan(double samplingFrequencyHz)
         {
-            var points = mLengthHalf;
-            var result = new double[points];
-            var stopValue = samplingFrequencyHz / 2.0;
-            var increment = stopValue / (points - 1.0);
+            UInt32 points = (UInt32)mLengthHalf;
+            double[] result = new double[points];
+            double stopValue = samplingFrequencyHz / 2.0;
+            double increment = stopValue / ((double)points - 1.0);
 
-            for (var i = 0; i < points; i++)
+            for (Int32 i = 0; i < points; i++)
                 result[i] += increment * i;
 
             return result;
@@ -595,13 +592,13 @@ namespace DSPLib
             /// <param name="stopVal">Any value > startVal</param>
             /// <param name="points">Number of points to generate</param>
             /// <returns>double[] array</returns>
-            public static double[] LinSpace(double startVal, double stopVal, uint points)
+            public static double[] LinSpace(double startVal, double stopVal, UInt32 points)
             {
-                var result = new double[points];
-                var increment = (stopVal - startVal) / (points - 1.0);
+                double[] result = new double[points];
+                double increment = (stopVal - startVal) / ((double)points - 1.0);
 
-                for (uint i = 0; i < points; i++)
-                    result[i] = startVal + (increment * i);
+                for (UInt32 i = 0; i < points; i++)
+                    result[i] = startVal + increment * i;
 
                 return result;
             }
@@ -617,15 +614,16 @@ namespace DSPLib
             /// <param name="dcV">[Optional] DC Voltage offset</param>
             /// <param name="phaseDeg">[Optional] Phase of signal in degrees</param>
             /// <returns>double[] array</returns>
-            public static double[] ToneSampling(double amplitudeVrms, double frequencyHz, double samplingFrequencyHz, uint points, double dcV = 0.0, double phaseDeg = 0)
+            public static double[] ToneSampling(double amplitudeVrms, double frequencyHz, double samplingFrequencyHz, UInt32 points, double dcV = 0.0, double phaseDeg = 0)
             {
-                var ph_r = phaseDeg * System.Math.PI / 180.0;
+                double ph_r = phaseDeg * System.Math.PI / 180.0;
+                double ampPeak = System.Math.Sqrt(2) * amplitudeVrms;
 
-                var rval = new double[points];
-                for (uint i = 0; i < points; i++)
+                double[] rval = new double[points];
+                for (UInt32 i = 0; i < points; i++)
                 {
-                    var time = i / samplingFrequencyHz;
-                    rval[i] = (System.Math.Sqrt(2) * amplitudeVrms * System.Math.Sin((2.0 * System.Math.PI * time * frequencyHz) + ph_r)) + dcV;
+                    double time = (double)i / samplingFrequencyHz;
+                    rval[i] = System.Math.Sqrt(2) * amplitudeVrms * System.Math.Sin(2.0 * System.Math.PI * time * frequencyHz + ph_r) + dcV;
                 }
                 return rval;
             }
@@ -640,15 +638,15 @@ namespace DSPLib
             /// <param name="dcV">[Optional] DC Voltage offset</param>
             /// <param name="phaseDeg">[Optional] Phase of signal in degrees</param>
             /// <returns>double[] array</returns>
-            public static double[] ToneCycles(double amplitudeVrms, double cycles, uint points, double dcV = 0.0, double phaseDeg = 0)
+            public static double[] ToneCycles(double amplitudeVrms, double cycles, UInt32 points, double dcV = 0.0, double phaseDeg = 0)
             {
-                var ph_r = phaseDeg * System.Math.PI / 180.0;
-                var ampPeak = System.Math.Sqrt(2) * amplitudeVrms;
+                double ph_r = phaseDeg * System.Math.PI / 180.0;
+                double ampPeak = System.Math.Sqrt(2) * amplitudeVrms;
 
-                var rval = new double[points];
-                for (uint i = 0; i < points; i++)
+                double[] rval = new double[points];
+                for (UInt32 i = 0; i < points; i++)
                 {
-                    rval[i] = (ampPeak * System.Math.Sin((2.0 * System.Math.PI * i / points * cycles) + ph_r)) + dcV;
+                    rval[i] = ampPeak * System.Math.Sin((2.0 * System.Math.PI * (double)i / (double)points * cycles) + ph_r) + dcV;
                 }
                 return rval;
             }
@@ -661,13 +659,13 @@ namespace DSPLib
             /// <param name="samplingFrequencyHz"></param>
             /// <param name="points"></param>
             /// <returns>double[] array</returns>
-            public static double[] NoisePsd(double amplitudePsd, double samplingFrequencyHz, uint points)
+            public static double[] NoisePsd(double amplitudePsd, double samplingFrequencyHz, UInt32 points)
             {
                 // Calculate what the noise amplitude needs to be in Vrms/rt_Hz
-                var arms = amplitudePsd * System.Math.Sqrt(samplingFrequencyHz / 2.0);
+                double arms = amplitudePsd * System.Math.Sqrt(samplingFrequencyHz / 2.0);
 
                 // Make an n length noise vector
-                var rval = NoiseRms(arms, points);
+                double[] rval = NoiseRms(arms, points);
 
                 return rval;
             }
@@ -681,12 +679,14 @@ namespace DSPLib
             /// <param name="points"></param>
             /// <param name="dcV"></param>
             /// <returns>double[] array</returns>
-            public static double[] NoiseRms(double amplitudeVrms, uint points, double dcV = 0.0)
+            public static double[] NoiseRms(double amplitudeVrms, UInt32 points, double dcV = 0.0)
             {
-                // Make an n length noise vector
-                var rval = Noise(points, amplitudeVrms);
+                double[] rval = new double[points];
 
-                rval = Math.Add(rval, dcV);
+                // Make an n length noise vector
+                rval = Noise(points, amplitudeVrms);
+
+                rval = DSPLib.DSP.Math.Add(rval, dcV);
 
                 return rval;
             }
@@ -695,9 +695,9 @@ namespace DSPLib
 
             //=====[ Gaussian Noise ]=====
 
-            private static readonly Random mRandom = new Random(); // Class level variable
+            private static Random mRandom = new Random(); // Class level variable
 
-            private static double[] Noise(uint size, double scaling_vrms)
+            private static double[] Noise(UInt32 size, double scaling_vrms)
             {
 
                 // Based on - Polar method (Marsaglia 1962)
@@ -711,34 +711,34 @@ namespace DSPLib
                 // of a "1/N" scaled DFT or FFT.
                 // Most DFT / FFT's are 1/N scaled - check your documentation to be sure...
 
-                var output_scale = scaling_vrms;
+                double output_scale = scaling_vrms;
 
-                var data = new double[size];
+                double[] data = new double[size];
                 double sum = 0;
 
-                for (uint n = 0; n < size; n++)
+                for (UInt32 n = 0; n < size; n++)
                 {
                     double s;
                     double v1;
                     do
                     {
-                        v1 = (2.0 * mRandom.NextDouble()) - 1.0;
-                        var v2 = (2.0 * mRandom.NextDouble()) - 1.0;
+                        v1 = 2.0 * mRandom.NextDouble() - 1.0;
+                        double v2 = 2.0 * mRandom.NextDouble() - 1.0;
 
-                        s = (v1 * v1) + (v2 * v2);
+                        s = v1 * v1 + v2 * v2;
                     } while (s >= 1.0);
 
                     if (s == 0.0)
                         data[n] = 0.0;
                     else
-                        data[n] = v1 * System.Math.Sqrt(-2.0 * System.Math.Log(s) / s) * output_scale;
+                        data[n] = (v1 * System.Math.Sqrt(-2.0 * System.Math.Log(s) / s)) * output_scale;
 
                     sum += data[n];
                 }
 
                 // Remove the average value
-                var average = sum / size;
-                for (uint n = 0; n < size; n++)
+                double average = sum / size;
+                for (UInt32 n = 0; n < size; n++)
                 {
                     data[n] -= average;
                 }
@@ -765,7 +765,7 @@ namespace DSPLib
         *
         *   G. Heinzel, A. Rudiger and R. Schilling,
         *   Max-Planck-Institut fur Gravitationsphysik
-        *
+        * 
         *   February 15, 2002
         *
         **/
@@ -825,12 +825,12 @@ namespace DSPLib
                 public static double Signal(double[] windowCoefficients)
                 {
                     double s1 = 0;
-                    foreach (var coeff in windowCoefficients)
+                    foreach (double coeff in windowCoefficients)
                     {
                         s1 += coeff;
                     }
 
-                    s1 /= windowCoefficients.Length;
+                    s1 = s1 / windowCoefficients.Length;
 
                     return 1.0 / s1;
                 }
@@ -847,15 +847,15 @@ namespace DSPLib
                 public static double Noise(double[] windowCoefficients, double samplingFrequencyHz)
                 {
                     double s2 = 0;
-                    foreach (var coeff in windowCoefficients)
+                    foreach (double coeff in windowCoefficients)
                     {
-                        s2 += coeff * coeff;
+                        s2 = s2 + (coeff * coeff);
                     }
 
                     double n = windowCoefficients.Length;
-                    var fbin = samplingFrequencyHz / n;
+                    double fbin = samplingFrequencyHz / n;
 
-                    var sf = System.Math.Sqrt(1.0 / (s2 / n * fbin));
+                    double sf = System.Math.Sqrt(1.0 / ((s2 / n) * fbin));
 
                     return sf;
                 }
@@ -870,16 +870,16 @@ namespace DSPLib
                 {
                     double s1 = 0;
                     double s2 = 0;
-                    foreach (var coeff in windowCoefficients)
+                    foreach (double coeff in windowCoefficients)
                     {
-                        s1 += coeff;
-                        s2 += coeff * coeff;
+                        s1 = s1 + coeff;
+                        s2 = s2 + (coeff * coeff);
                     }
 
                     double n = windowCoefficients.Length;
-                    s1 /= n;
+                    s1 = s1 / n;
 
-                    var nenbw = s2 / (s1 * s1) / n;
+                    double nenbw = (s2 / (s1 * s1)) / n;
 
                     return nenbw;
                 }
@@ -894,180 +894,180 @@ namespace DSPLib
             /// <param name="windowName"></param>
             /// <param name="points"></param>
             /// <returns>double[] array of the calculated window coefficients</returns>
-            public static double[] Coefficients(Type windowName, uint points)
+            public static double[] Coefficients(Type windowName, UInt32 points)
             {
-                var winCoeffs = new double[points];
-                double n = points;
+                double[] winCoeffs = new double[points];
+                double N = points;
 
                 switch (windowName)
                 {
-                    case Type.None:
-                    case Type.Rectangular:
+                    case Window.Type.None:
+                    case Window.Type.Rectangular:
                         //wc = ones(N,1);
-                        for (uint i = 0; i < points; i++)
+                        for (UInt32 i = 0; i < points; i++)
                             winCoeffs[i] = 1.0;
 
                         break;
 
-                    case Type.Bartlett:
+                    case Window.Type.Bartlett:
                         //n = (0:N-1)';
                         //wc = 2/N*(N/2-abs(n-(N-1)/2));
-                        for (uint i = 0; i < points; i++)
-                            winCoeffs[i] = 2.0 / n * ((n / 2.0) - System.Math.Abs(i - ((n - 1.0) / 2.0)));
+                        for (UInt32 i = 0; i < points; i++)
+                            winCoeffs[i] = 2.0 / N * (N / 2.0 - System.Math.Abs(i - (N - 1.0) / 2.0));
 
                         break;
 
-                    case Type.Welch:
+                    case Window.Type.Welch:
                         //n = (0:N-1)';
                         //wc = 1 - ( ((2*n)/N) - 1).^2;
-                        for (uint i = 0; i < points; i++)
-                            winCoeffs[i] = 1.0 - System.Math.Pow((2.0 * i / n) - 1.0, 2.0);
+                        for (UInt32 i = 0; i < points; i++)
+                            winCoeffs[i] = 1.0 - System.Math.Pow(((2.0 * i) / N) - 1.0, 2.0);
                         break;
 
-                    case Type.Hann:
-                    case Type.Hanning:
+                    case Window.Type.Hann:
+                    case Window.Type.Hanning:
                         //wc = (0.5 - 0.5*cos (z));
                         winCoeffs = SineExpansion(points, 0.5, -0.5);
                         break;
 
-                    case Type.Hamming:
+                    case Window.Type.Hamming:
                         //wc = (0.54 - 0.46*cos (z));
                         winCoeffs = SineExpansion(points, 0.54, -0.46);
                         break;
 
-                    case Type.BH92: // Also known as: Blackman-Harris
-                                    //wc = (0.35875 - 0.48829*cos(z) + 0.14128*cos(2*z) - 0.01168*cos(3*z));
+                    case Window.Type.BH92: // Also known as: Blackman-Harris
+                                 //wc = (0.35875 - 0.48829*cos(z) + 0.14128*cos(2*z) - 0.01168*cos(3*z));
                         winCoeffs = SineExpansion(points, 0.35875, -0.48829, 0.14128, -0.01168);
                         break;
 
-                    case Type.Nutall3:
+                    case Window.Type.Nutall3:
                         //c0 = 0.375; c1 = -0.5; c2 = 0.125;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z);
                         winCoeffs = SineExpansion(points, 0.375, -0.5, 0.125);
                         break;
 
-                    case Type.Nutall3A:
+                    case Window.Type.Nutall3A:
                         //c0 = 0.40897; c1 = -0.5; c2 = 0.09103;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z);
                         winCoeffs = SineExpansion(points, 0.40897, -0.5, 0.09103);
                         break;
 
-                    case Type.Nutall3B:
+                    case Window.Type.Nutall3B:
                         //c0 = 0.4243801; c1 = -0.4973406; c2 = 0.0782793;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z);
                         winCoeffs = SineExpansion(points, 0.4243801, -0.4973406, 0.0782793);
                         break;
 
-                    case Type.Nutall4:
+                    case Window.Type.Nutall4:
                         //c0 = 0.3125; c1 = -0.46875; c2 = 0.1875; c3 = -0.03125;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z) + c3*cos(3*z);
                         winCoeffs = SineExpansion(points, 0.3125, -0.46875, 0.1875, -0.03125);
                         break;
 
-                    case Type.Nutall4A:
+                    case Window.Type.Nutall4A:
                         //c0 = 0.338946; c1 = -0.481973; c2 = 0.161054; c3 = -0.018027;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z) + c3*cos(3*z);
                         winCoeffs = SineExpansion(points, 0.338946, -0.481973, 0.161054, -0.018027);
                         break;
 
-                    case Type.Nutall4B:
+                    case Window.Type.Nutall4B:
                         //c0 = 0.355768; c1 = -0.487396; c2 = 0.144232; c3 = -0.012604;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z) + c3*cos(3*z);
                         winCoeffs = SineExpansion(points, 0.355768, -0.487396, 0.144232, -0.012604);
                         break;
 
-                    case Type.SFT3F:
+                    case Window.Type.SFT3F:
                         //c0 = 0.26526; c1 = -0.5; c2 = 0.23474;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z);
                         winCoeffs = SineExpansion(points, 0.26526, -0.5, 0.23474);
                         break;
 
-                    case Type.SFT4F:
+                    case Window.Type.SFT4F:
                         //c0 = 0.21706; c1 = -0.42103; c2 = 0.28294; c3 = -0.07897;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z) + c3*cos(3*z);
                         winCoeffs = SineExpansion(points, 0.21706, -0.42103, 0.28294, -0.07897);
                         break;
 
-                    case Type.SFT5F:
+                    case Window.Type.SFT5F:
                         //c0 = 0.1881; c1 = -0.36923; c2 = 0.28702; c3 = -0.13077; c4 = 0.02488;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z) + c3*cos(3*z) + c4*cos(4*z);
                         winCoeffs = SineExpansion(points, 0.1881, -0.36923, 0.28702, -0.13077, 0.02488);
                         break;
 
-                    case Type.SFT3M:
+                    case Window.Type.SFT3M:
                         //c0 = 0.28235; c1 = -0.52105; c2 = 0.19659;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z);
                         winCoeffs = SineExpansion(points, 0.28235, -0.52105, 0.19659);
                         break;
 
-                    case Type.SFT4M:
+                    case Window.Type.SFT4M:
                         //c0 = 0.241906; c1 = -0.460841; c2 = 0.255381; c3 = -0.041872;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z) + c3*cos(3*z);
                         winCoeffs = SineExpansion(points, 0.241906, -0.460841, 0.255381, -0.041872);
                         break;
 
-                    case Type.SFT5M:
+                    case Window.Type.SFT5M:
                         //c0 = 0.209671; c1 = -0.407331; c2 = 0.281225; c3 = -0.092669; c4 = 0.0091036;
                         //wc = c0 + c1*cos(z) + c2*cos(2*z) + c3*cos(3*z) + c4*cos(4*z);
                         winCoeffs = SineExpansion(points, 0.209671, -0.407331, 0.281225, -0.092669, 0.0091036);
                         break;
 
-                    case Type.FTNI:
+                    case Window.Type.FTNI:
                         //wc = (0.2810639 - 0.5208972*cos(z) + 0.1980399*cos(2*z));
                         winCoeffs = SineExpansion(points, 0.2810639, -0.5208972, 0.1980399);
                         break;
 
-                    case Type.FTHP:
+                    case Window.Type.FTHP:
                         //wc = 1.0 - 1.912510941*cos(z) + 1.079173272*cos(2*z) - 0.1832630879*cos(3*z);
                         winCoeffs = SineExpansion(points, 1.0, -1.912510941, 1.079173272, -0.1832630879);
                         break;
 
-                    case Type.HFT70:
+                    case Window.Type.HFT70:
                         //wc = 1 - 1.90796*cos(z) + 1.07349*cos(2*z) - 0.18199*cos(3*z);
                         winCoeffs = SineExpansion(points, 1, -1.90796, 1.07349, -0.18199);
                         break;
 
-                    case Type.FTSRS:
+                    case Window.Type.FTSRS:
                         //wc = 1.0 - 1.93*cos(z) + 1.29*cos(2*z) - 0.388*cos(3*z) + 0.028*cos(4*z);
                         winCoeffs = SineExpansion(points, 1.0, -1.93, 1.29, -0.388, 0.028);
                         break;
 
-                    case Type.HFT90D:
+                    case Window.Type.HFT90D:
                         //wc = 1 - 1.942604*cos(z) + 1.340318*cos(2*z) - 0.440811*cos(3*z) + 0.043097*cos(4*z);
                         winCoeffs = SineExpansion(points, 1.0, -1.942604, 1.340318, -0.440811, 0.043097);
                         break;
 
-                    case Type.HFT95:
+                    case Window.Type.HFT95:
                         //wc = 1 - 1.9383379*cos(z) + 1.3045202*cos(2*z) - 0.4028270*cos(3*z) + 0.0350665*cos(4*z);
                         winCoeffs = SineExpansion(points, 1, -1.9383379, 1.3045202, -0.4028270, 0.0350665);
                         break;
 
-                    case Type.HFT116D:
+                    case Window.Type.HFT116D:
                         //wc = 1 - 1.9575375*cos(z) + 1.4780705*cos(2*z) - 0.6367431*cos(3*z) + 0.1228389*cos(4*z) - 0.0066288*cos(5*z);
                         winCoeffs = SineExpansion(points, 1.0, -1.9575375, 1.4780705, -0.6367431, 0.1228389, -0.0066288);
                         break;
 
-                    case Type.HFT144D:
+                    case Window.Type.HFT144D:
                         //wc = 1 - 1.96760033*cos(z) + 1.57983607*cos(2*z) - 0.81123644*cos(3*z) + 0.22583558*cos(4*z) - 0.02773848*cos(5*z) + 0.00090360*cos(6*z);
                         winCoeffs = SineExpansion(points, 1.0, -1.96760033, 1.57983607, -0.81123644, 0.22583558, -0.02773848, 0.00090360);
                         break;
 
-                    case Type.HFT169D:
+                    case Window.Type.HFT169D:
                         //wc = 1 - 1.97441842*cos(z) + 1.65409888*cos(2*z) - 0.95788186*cos(3*z) + 0.33673420*cos(4*z) - 0.06364621*cos(5*z) + 0.00521942*cos(6*z) - 0.00010599*cos(7*z);
                         winCoeffs = SineExpansion(points, 1.0, -1.97441842, 1.65409888, -0.95788186, 0.33673420, -0.06364621, 0.00521942, -0.00010599);
                         break;
 
-                    case Type.HFT196D:
+                    case Window.Type.HFT196D:
                         //wc = 1 - 1.979280420*cos(z) + 1.710288951*cos(2*z) - 1.081629853*cos(3*z)+ 0.448734314*cos(4*z) - 0.112376628*cos(5*z) + 0.015122992*cos(6*z) - 0.000871252*cos(7*z) + 0.000011896*cos(8*z);
                         winCoeffs = SineExpansion(points, 1.0, -1.979280420, 1.710288951, -1.081629853, 0.448734314, -0.112376628, 0.015122992, -0.000871252, 0.000011896);
                         break;
 
-                    case Type.HFT223D:
+                    case Window.Type.HFT223D:
                         //wc = 1 - 1.98298997309*cos(z) + 1.75556083063*cos(2*z) - 1.19037717712*cos(3*z) + 0.56155440797*cos(4*z) - 0.17296769663*cos(5*z) + 0.03233247087*cos(6*z) - 0.00324954578*cos(7*z) + 0.00013801040*cos(8*z) - 0.00000132725*cos(9*z);
                         winCoeffs = SineExpansion(points, 1.0, -1.98298997309, 1.75556083063, -1.19037717712, 0.56155440797, -0.17296769663, 0.03233247087, -0.00324954578, 0.00013801040, -0.00000132725);
                         break;
 
-                    case Type.HFT248D:
+                    case Window.Type.HFT248D:
                         //wc = 1 - 1.985844164102*cos(z) + 1.791176438506*cos(2*z) - 1.282075284005*cos(3*z) + 0.667777530266*cos(4*z) - 0.240160796576*cos(5*z) + 0.056656381764*cos(6*z) - 0.008134974479*cos(7*z) + 0.000624544650*cos(8*z) - 0.000019808998*cos(9*z) + 0.000000132974*cos(10*z);
                         winCoeffs = SineExpansion(points, 1, -1.985844164102, 1.791176438506, -1.282075284005, 0.667777530266, -0.240160796576, 0.056656381764, -0.008134974479, 0.000624544650, -0.000019808998, 0.000000132974);
                         break;
@@ -1080,18 +1080,18 @@ namespace DSPLib
                 return winCoeffs;
             }
 
-            private static double[] SineExpansion(uint points, double c0, double c1 = 0.0, double c2 = 0.0, double c3 = 0.0, double c4 = 0.0, double c5 = 0.0, double c6 = 0.0, double c7 = 0.0, double c8 = 0.0, double c9 = 0.0, double c10 = 0.0)
+            private static double[] SineExpansion(UInt32 points, double c0, double c1 = 0.0, double c2 = 0.0, double c3 = 0.0, double c4 = 0.0, double c5 = 0.0, double c6 = 0.0, double c7 = 0.0, double c8 = 0.0, double c9 = 0.0, double c10 = 0.0)
             {
                 // z = 2 * pi * (0:N-1)' / N;   // Cosine Vector
-                var z = new double[points];
-                for (uint i = 0; i < points; i++)
+                double[] z = new double[points];
+                for (UInt32 i = 0; i < points; i++)
                     z[i] = 2.0 * System.Math.PI * i / points;
 
-                var winCoeffs = new double[points];
+                double[] winCoeffs = new double[points];
 
-                for (uint i = 0; i < points; i++)
+                for (UInt32 i = 0; i < points; i++)
                 {
-                    var wc = c0;
+                    double wc = c0;
                     wc += c1 * System.Math.Cos(z[i]);
                     wc += c2 * System.Math.Cos(2.0 * z[i]);
                     wc += c3 * System.Math.Cos(3.0 * z[i]);
@@ -1130,9 +1130,9 @@ namespace DSPLib
             /// <returns></returns>
             public static double[] ToMagnitudeSquared(double[] magnitude)
             {
-                var np = (uint)magnitude.Length;
-                var mag2 = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)magnitude.Length;
+                double[] mag2 = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
                     mag2[i] = magnitude[i] * magnitude[i];
                 }
@@ -1148,12 +1148,12 @@ namespace DSPLib
             /// <returns>double[] array</returns>
             public static double[] ToMagnitudeDBV(double[] magnitude)
             {
-                var np = (uint)magnitude.Length;
-                var magDBV = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)magnitude.Length;
+                double[] magDBV = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
-                    var magVal = magnitude[i];
-                    if (magVal <= 0.0)
+                    double magVal = magnitude[i];
+                    if(magVal <= 0.0)
                         magVal = double.Epsilon;
 
                     magDBV[i] = 20 * System.Math.Log10(magVal);
@@ -1182,9 +1182,9 @@ namespace DSPLib
             /// <returns>double[] array</returns>
             public static double[] ToMagnitude(double[] magSquared)
             {
-                var np = (uint)magSquared.Length;
-                var mag = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)magSquared.Length;
+                double[] mag = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
                     mag[i] = System.Math.Sqrt(magSquared[i]);
                 }
@@ -1199,11 +1199,11 @@ namespace DSPLib
             /// <returns>double[] array</returns>
             public static double[] ToMagnitudeDBV(double[] magSquared)
             {
-                var np = (uint)magSquared.Length;
-                var magDBV = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)magSquared.Length;
+                double[] magDBV = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
-                    var magSqVal = magSquared[i];
+                    double magSqVal = magSquared[i];
                     if (magSqVal <= 0.0)
                         magSqVal = double.Epsilon;
 
@@ -1231,11 +1231,11 @@ namespace DSPLib
             /// <returns>double[] MagSquared Format</returns>
             public static double[] ToMagnitudeSquared(Complex[] rawFFT)
             {
-                var np = (uint)rawFFT.Length;
-                var magSquared = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)rawFFT.Length;
+                double[] magSquared = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
-                    var mag = rawFFT[i].Magnitude;
+                    double mag = rawFFT[i].Magnitude;
                     magSquared[i] = mag * mag;
                 }
 
@@ -1250,9 +1250,9 @@ namespace DSPLib
             /// <returns>double[] Magnitude Format (Vrms)</returns>
             public static double[] ToMagnitude(Complex[] rawFFT)
             {
-                var np = (uint)rawFFT.Length;
-                var mag = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)rawFFT.Length;
+                double[] mag = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
                     mag[i] = rawFFT[i].Magnitude;
                 }
@@ -1268,11 +1268,11 @@ namespace DSPLib
             /// <returns>double[] Magnitude Format (dBV)</returns>
             public static double[] ToMagnitudeDBV(Complex[] rawFFT)
             {
-                var np = (uint)rawFFT.Length;
-                var mag = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)rawFFT.Length;
+                double[] mag = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
-                    var magVal = rawFFT[i].Magnitude;
+                    double magVal = rawFFT[i].Magnitude;
 
                     if (magVal <= 0.0)
                         magVal = double.Epsilon;
@@ -1291,11 +1291,11 @@ namespace DSPLib
             /// <returns>double[] Phase (Degrees)</returns>
             public static double[] ToPhaseDegrees(Complex[] rawFFT)
             {
-                var sf = 180.0 / System.Math.PI; // Degrees per Radian scale factor
+                double sf = 180.0 / System.Math.PI; // Degrees per Radian scale factor
 
-                var np = (uint)rawFFT.Length;
-                var phase = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)rawFFT.Length;
+                double[] phase = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
                     phase[i] = rawFFT[i].Phase * sf;
                 }
@@ -1311,9 +1311,9 @@ namespace DSPLib
             /// <returns>double[] Phase (Degrees)</returns>
             public static double[] ToPhaseRadians(Complex[] rawFFT)
             {
-                var np = (uint)rawFFT.Length;
-                var phase = new double[np];
-                for (uint i = 0; i < np; i++)
+                UInt32 np = (UInt32)rawFFT.Length;
+                double[] phase = new double[np];
+                for (UInt32 i = 0; i < np; i++)
                 {
                     phase[i] = rawFFT[i].Phase;
                 }
@@ -1338,28 +1338,27 @@ namespace DSPLib
             /// <param name="startBin"> = Bin to start the counting at (0 based)."></param>
             /// <param name="stopBin"> = Bin FROM END to stop counting at (Max = N - 1)."></param>
             /// <returns>RMS value of input array between start and stop bins.</returns>
-            public static double FindRms(double[] a, uint startBin = 10, uint stopBin = 10)
+            public static double FindRms(double[] a, UInt32 startBin = 10, UInt32 stopBin = 10)
             {
-                var sum2 = 0.0;
-                uint actualSumCount = 0;
-                var n = (uint)a.Length;
-                for (uint i = 0; i < n; i++)
+                double sum2 = 0.0;
+                UInt32 actualSumCount = 0;
+                UInt32 n = (UInt32)a.Length;
+                for (UInt32 i = 0; i < n; i++)
                 {
                     if (i <= startBin - 1)
                         continue;
-                    if (i > n - 1 - stopBin)
+                    if (i > (n - 1) - (stopBin))
                         continue;
 
                     sum2 += a[i] * a[i];
                     actualSumCount++;
                 }
 
-                var avg2 = sum2 / actualSumCount;
-                var rms = System.Math.Sqrt(avg2);
+                double avg2 = sum2 / actualSumCount;
+                double rms = System.Math.Sqrt(avg2);
 
                 return rms;
             }
-
 
             /// <summary>
             /// Finds the mean of the input array.
@@ -1368,20 +1367,20 @@ namespace DSPLib
             /// <param name="startBin"> = Bin to start the counting at (0 based)."></param>
             /// <param name="stopBin"> = Bin FROM END to stop counting at (Max = N - 1)."></param>
             /// <returns>Mean value of input array between start and stop bins.</returns>
-            public static double FindMean(double[] inData, uint startBin = 10, uint stopBin = 10)
+            public static double FindMean(double[] inData, UInt32 startBin = 10, UInt32 stopBin = 10)
             {
                 double sum = 0;
                 double n = inData.Length;
-                uint actualSumCount = 0;
+                UInt32 actualSumCount = 0;
 
-                for (uint i = 0; i < n; i++)
+                for (UInt32 i = 0; i < n; i++)
                 {
                     if (i <= startBin - 1)
                         continue;
-                    if (i > n - 1 - stopBin)
+                    if (i > (n - 1) - (stopBin))
                         continue;
 
-                    sum += inData[i];
+                    sum = sum + inData[i];
                     actualSumCount++;
                 }
                 return sum / actualSumCount;
@@ -1396,9 +1395,9 @@ namespace DSPLib
             public static double FindMaxAmplitude(double[] inData)
             {
                 double n = inData.Length;
-                var maxVal = -1e300;
+                double maxVal = -1e300;
 
-                for (uint i = 0; i < n; i++)
+                for (UInt32 i = 0; i < n; i++)
                 {
                     if (inData[i] > maxVal)
                     {
@@ -1415,13 +1414,13 @@ namespace DSPLib
             /// </summary>
             /// <param name="inData"></param>
             /// <returns>Position of maximum value in input array</returns>
-            public static uint FindMaxPosition(double[] inData)
+            public static UInt32 FindMaxPosition(double[] inData)
             {
                 double n = inData.Length;
-                var maxVal = -1e300;
-                uint maxIndex = 0;
+                double maxVal = -1e300;
+                UInt32 maxIndex = 0;
 
-                for (uint i = 0; i < n; i++)
+                for (UInt32 i = 0; i < n; i++)
                 {
                     if (inData[i] > maxVal)
                     {
@@ -1442,10 +1441,10 @@ namespace DSPLib
             public static double FindMaxFrequency(double[] inData, double[] fSpan)
             {
                 double n = inData.Length;
-                var maxVal = -1e300;
-                uint maxIndex = 0;
+                double maxVal = -1e300;
+                UInt32 maxIndex = 0;
 
-                for (uint i = 0; i < n; i++)
+                for (UInt32 i = 0; i < n; i++)
                 {
                     if (inData[i] > maxVal)
                     {
@@ -1465,29 +1464,29 @@ namespace DSPLib
             /// <returns>Continuous Phase data</returns>
             public static double[] UnwrapPhaseDegrees(double[] inPhaseDeg)
             {
-                var n = (uint)inPhaseDeg.Length;
-                var unwrappedPhase = new double[n];
+                UInt32 N = (UInt32)inPhaseDeg.Length;
+                double[] unwrappedPhase = new double[N];
 
-                var tempInData = new double[n];
+                double[] tempInData = new double[N];
                 inPhaseDeg.CopyTo(tempInData, 0);
 
                 // First point is unchanged
                 unwrappedPhase[0] = tempInData[0];
 
-                for (uint i = 1; i < n; i++)
+                for (UInt32 i = 1; i < N; i++)
                 {
-                    var delta = System.Math.Abs(tempInData[i - 1] - tempInData[i]);
+                    double delta = System.Math.Abs(tempInData[i - 1] - tempInData[i]);
                     if (delta >= 180)
                     {
                         // Phase jump!
                         if (tempInData[i - 1] < 0.0)
                         {
-                            for (var j = i; j < n; j++)
+                            for (UInt32 j = i; j < N; j++)
                                 tempInData[j] += -360;
                         }
                         else
                         {
-                            for (var j = i; j < n; j++)
+                            for (UInt32 j = i; j < N; j++)
                                 tempInData[j] += 360;
                         }
                     }
@@ -1504,33 +1503,33 @@ namespace DSPLib
             /// <returns>Continuous Phase data</returns>
             public static double[] UnwrapPhaseRadians(double[] inPhaseRad)
             {
-                var pi = System.Math.PI;
-                var twoPi = System.Math.PI * 2.0;
+                double pi = System.Math.PI;
+                double twoPi = System.Math.PI * 2.0;
 
-                var n = (uint)inPhaseRad.Length;
+                UInt32 N = (UInt32)inPhaseRad.Length;
 
-                var tempInData = new double[n];
+                double[] tempInData = new double[N];
                 inPhaseRad.CopyTo(tempInData, 0);
 
-                var unwrappedPhase = new double[n];
+                double[] unwrappedPhase = new double[N];
 
                 // First point is unchanged
                 unwrappedPhase[0] = tempInData[0];
 
-                for (uint i = 1; i < n; i++)
+                for (UInt32 i = 1; i < N; i++)
                 {
-                    var delta = System.Math.Abs(tempInData[i - 1] - tempInData[i]);
+                    double delta = System.Math.Abs(tempInData[i - 1] - tempInData[i]);
                     if (delta >= pi)
                     {
                         // Phase jump!
                         if (tempInData[i - 1] < 0.0)
                         {
-                            for (var j = i; j < n; j++)
+                            for (UInt32 j = i; j < N; j++)
                                 tempInData[j] += -twoPi;
                         }
                         else
                         {
-                            for (var j = i; j < n; j++)
+                            for (UInt32 j = i; j < N; j++)
                                 tempInData[j] += twoPi;
                         }
                     }
@@ -1554,12 +1553,12 @@ namespace DSPLib
             /// <summary>
             /// result[] = a[] * b[]
             /// </summary>
-            public static double[] Multiply(double[] a, double[] b)
+            public static Double[] Multiply(Double[] a, Double[] b)
             {
                 Debug.Assert(a.Length == b.Length, "Length of arrays a[] and b[] must match.");
 
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] * b[i];
 
                 return result;
@@ -1568,10 +1567,10 @@ namespace DSPLib
             /// <summary>
             /// result[] = a[] * b
             /// </summary>
-            public static double[] Multiply(double[] a, double b)
+            public static Double[] Multiply(Double[] a, Double b)
             {
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] * b;
 
                 return result;
@@ -1580,12 +1579,12 @@ namespace DSPLib
             /// <summary>
             /// result[] = a[] + b[]
             /// </summary>
-            public static double[] Add(double[] a, double[] b)
+            public static Double[] Add(Double[] a, Double[] b)
             {
                 Debug.Assert(a.Length == b.Length, "Length of arrays a[] and b[] must match.");
 
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] + b[i];
 
                 return result;
@@ -1594,10 +1593,10 @@ namespace DSPLib
             /// <summary>
             /// result[] = a[] + b
             /// </summary>
-            public static double[] Add(double[] a, double b)
+            public static Double[] Add(Double[] a, Double b)
             {
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] + b;
 
                 return result;
@@ -1606,12 +1605,12 @@ namespace DSPLib
             /// <summary>
             /// result[] = a[] - b[]
             /// </summary>
-            public static double[] Subtract(double[] a, double[] b)
+            public static Double[] Subtract(Double[] a, Double[] b)
             {
                 Debug.Assert(a.Length == b.Length, "Length of arrays a[] and b[] must match.");
 
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] - b[i];
 
                 return result;
@@ -1620,10 +1619,10 @@ namespace DSPLib
             /// <summary>
             /// result[] = a[] - b
             /// </summary>
-            public static double[] Subtract(double[] a, double b)
+            public static Double[] Subtract(Double[] a, Double b)
             {
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] - b;
 
                 return result;
@@ -1632,12 +1631,12 @@ namespace DSPLib
             /// <summary>
             /// result[] = a[] / b[]
             /// </summary>
-            public static double[] Divide(double[] a, double[] b)
+            public static Double[] Divide(Double[] a, Double[] b)
             {
                 Debug.Assert(a.Length == b.Length, "Length of arrays a[] and b[] must match.");
 
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] / b[i];
 
                 return result;
@@ -1646,10 +1645,10 @@ namespace DSPLib
             /// <summary>
             /// result[] = a[] / b
             /// </summary>
-            public static double[] Divide(double[] a, double b)
+            public static Double[] Divide(Double[] a, Double b)
             {
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] / b;
 
                 return result;
@@ -1660,8 +1659,8 @@ namespace DSPLib
             /// </summary>
             public static double[] Sqrt(double[] a)
             {
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = System.Math.Sqrt(a[i]);
 
                 return result;
@@ -1672,8 +1671,8 @@ namespace DSPLib
             /// </summary>
             public static double[] Square(double[] a)
             {
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                     result[i] = a[i] * a[i];
 
                 return result;
@@ -1684,10 +1683,10 @@ namespace DSPLib
             /// </summary>
             public static double[] Log10(double[] a)
             {
-                var result = new double[a.Length];
-                for (uint i = 0; i < a.Length; i++)
+                double[] result = new double[a.Length];
+                for (UInt32 i = 0; i < a.Length; i++)
                 {
-                    var val = a[i];
+                    double val = a[i];
                     if (val <= 0.0)
                         val = double.Epsilon;
 
@@ -1702,13 +1701,13 @@ namespace DSPLib
             /// </summary>
             public static double[] RemoveMean(double[] a)
             {
-                var sum = 0.0;
-                for (uint i = 0; i < a.Length; i++)
+                double sum = 0.0;
+                for (UInt32 i = 0; i < a.Length; i++)
                     sum += a[i];
 
-                var mean = sum / a.Length;
+                double mean = sum / a.Length;
 
-                return Subtract(a, mean);
+                return (DSP.Math.Subtract(a, mean));
             }
 
         }

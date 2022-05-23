@@ -1,6 +1,6 @@
 ﻿using BeatmapEditor3D.DataModels;
 
-namespace EditorEX.Filter
+namespace EditorEX.BeatmapFilter
 {
     internal class BeatmapSortInfo
     {
