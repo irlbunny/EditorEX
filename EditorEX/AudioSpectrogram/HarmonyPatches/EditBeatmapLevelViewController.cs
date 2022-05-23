@@ -16,7 +16,7 @@ namespace EditorEX.HarmonyPatches
             if (SpectrogramView.Instance != null)
                 SpectrogramView.Instance.Dispose();
 
-            SpectrogramView.Instance = new SpectrogramView(____beatmapDataModel.audioClip);
+            SpectrogramView.Instance = new(____beatmapDataModel.audioClip);
         }
     }
 }
