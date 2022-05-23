@@ -128,6 +128,7 @@
   <ItemGroup>
     <Compile Include="Filter\BeatmapsListViewControllerExtensions.cs" />
     <Compile Include="HarmonyPatches\BeatBasedItemContainer.cs" />
+    <Compile Include="HarmonyPatches\BeatmapProjectManager.cs" />
     <Compile Include="HarmonyPatches\ToggleZenModeCommand.cs" />
     <Compile Include="HarmonyPatches\EditBeatmapLevelViewController.cs" />
     <Compile Include="HarmonyPatches\NoteTypeHelper.cs" />
