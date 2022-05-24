@@ -15,7 +15,11 @@ namespace EditorEX
 
         public virtual bool HideEnvironmentSpectrograms { get; set; } = true;
         public virtual bool UseEnvironmentColors { get; set; } = true;
+
         public virtual bool ShowSpectrogram { get; set; } = true;
+
+        public virtual float SpectrogramXOffset { get; set; } = 1f;
+        public virtual float SpectrogramWidth { get; set; } = .5f;
 
         public virtual void Changed()
         {

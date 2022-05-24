@@ -12,7 +12,7 @@ namespace EditorEX.AudioSpectrogram.HarmonyPatches
             if (SpectrogramView.Instance != null)
             {
                 var localPosition = SpectrogramView.Instance.Container.transform.localPosition;
-                localPosition.x = -____currentBeatLineTransform.localScale.x + -1f;
+                localPosition.x = -____currentBeatLineTransform.localScale.x + -1f + Config.Instance.SpectrogramXOffset;
                 SpectrogramView.Instance.Container.transform.localPosition = localPosition;
             }
         }

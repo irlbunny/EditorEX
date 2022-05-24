@@ -182,6 +182,7 @@ namespace EditorEX.AudioSpectrogram
                 spectrogramBundle.Unload(false);
 
                 Container = new GameObject("SpectrogramContainer");
+                Container.transform.localScale = new(Config.Instance.SpectrogramWidth, 1f, 1f);
 
                 // Create a clone of BeatmapObjectsContainer beatline.
                 var beatLine = GameObject.Find("Wrapper/BeatmapObjectsContainer/BeatGridContainer/CurrentBeatline");
@@ -205,7 +206,7 @@ namespace EditorEX.AudioSpectrogram
                     spectrogramChunk.name = $"SpectrogramChunk{i}";
 
                     // Primitive Plane is 10x10, changes the size to (5 seconds of distance) x 5.
-                    spectrogramChunk.transform.localScale = new(beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 10f, 1f, .5f);
+                    spectrogramChunk.transform.localScale = new(beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 10f, 1f, -.5f);
                     spectrogramChunk.SetActive(false);
 
                     _spectrogramChunks[i] = spectrogramChunk;
