@@ -1,37 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{580D9F93-F5C4-449D-A5C8-4ACA2E18874B}</ProjectGuid>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EditorEX</RootNamespace>
-    <AssemblyName>EditorEX</AssemblyName>
     <LangVersion>9.0</LangVersion>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>portable</DebugType>
     <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
     <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
     <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-    <!--<PathMap>$(AppOutputBase)=X:\$(AssemblyName)\</PathMap>-->
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition="$(DefineConstants.Contains('CIBuild')) OR '$(NCrunch)' == '1'">
     <DisableCopyToPlugins>True</DisableCopyToPlugins>
@@ -76,8 +51,6 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="Main">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
       <Private>False</Private>
@@ -126,34 +99,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioSpectrogram\HarmonyPatches\BeatBasedItemContainer.cs" />
-    <Compile Include="AudioSpectrogram\HarmonyPatches\BeatGridContainer.cs" />
-    <Compile Include="HarmonyPatches\BeatmapProjectManager.cs" />
-    <Compile Include="AudioSpectrogram\HarmonyPatches\ToggleZenModeCommand.cs" />
-    <Compile Include="AudioSpectrogram\HarmonyPatches\EditBeatmapLevelViewController.cs" />
-    <Compile Include="BeatmapFilter\BeatmapsListViewControllerExtensions.cs" />
-    <Compile Include="HarmonyPatches\NoteTypeHelper.cs" />
-    <Compile Include="HarmonyPatches\ObstaclesRepository.cs" />
-    <Compile Include="BeatmapFilter\HarmonyPatches\BeatmapsListViewController.cs" />
-    <Compile Include="HarmonyPatches\SpectrogramAwake.cs" />
-    <Compile Include="Installers\EXGameCoreInstaller.cs" />
-    <Compile Include="Managers\ColorManagerInstanceManager.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="Config.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BeatmapFilter\BeatmapSortInfo.cs" />
-    <Compile Include="Utilities\DSPLib.cs" />
-    <Compile Include="Utilities\SceneUtil.cs" />
-    <Compile Include="Utilities\UIUtil.cs" />
-    <Compile Include="AudioSpectrogram\Colors\IColorData.cs" />
-    <Compile Include="AudioSpectrogram\Colors\InfernoColorData.cs" />
-    <Compile Include="AudioSpectrogram\SpectrogramView.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" />
     <None Include="EditorEX.csproj.user" Condition="Exists('EditorEX.csproj.user')" />
   </ItemGroup>
   <ItemGroup>
@@ -167,6 +115,4 @@
     <EmbeddedResource Include="Resources\filter.png" />
     <EmbeddedResource Include="Resources\spectrogram.bundle" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
