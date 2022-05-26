@@ -5,12 +5,12 @@ namespace EditorEX.BeatmapFilter
     internal class BeatmapSortInfo
     {
         public readonly int Points;
-        public readonly IBeatmapInfoData Data;
+        public readonly IBeatmapInfoData BeatmapInfoData;
 
-        public BeatmapSortInfo(int points, IBeatmapInfoData data)
+        public BeatmapSortInfo(int points, IBeatmapInfoData beatmapInfoData)
         {
             Points = points;
-            Data = data;
+            BeatmapInfoData = beatmapInfoData;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace EditorEX.HarmonyPatches
 {
     // Prevents a crash when exiting level editor without having any saves present.
     // Caused by entering a new difficulty and exiting without saving before placing any objects.
-    [HarmonyPatch(typeof(BeatmapProjectManager), "ReplaceBeatmapLevelFromLatestSave")]
+    [HarmonyPatch(typeof(BeatmapProjectManager), nameof(BeatmapProjectManager.ReplaceBeatmapLevelFromLatestSave))]
     internal class BeatmapProjectManagerReplaceBeatmapLevelFromLatestSave
     {
         private static bool Prefix(BeatmapCharacteristicSO beatmapCharacteristic, BeatmapDifficulty beatmapDifficulty,
