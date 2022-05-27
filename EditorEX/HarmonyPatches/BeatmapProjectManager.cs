@@ -16,11 +16,9 @@ namespace EditorEX.HarmonyPatches
             if (!____projectOpened)
                 return false;
 
-            IDifficultyBeatmapSetData difficultyBeatmapSetData;
-            if (!____beatmapDataModel.difficultyBeatmapSets.TryGetValue(beatmapCharacteristic, out difficultyBeatmapSetData))
+            if (!____beatmapDataModel.difficultyBeatmapSets.TryGetValue(beatmapCharacteristic, out var difficultyBeatmapSetData))
                 return false;
-            IDifficultyBeatmapData difficultyBeatmapData;
-            if (!difficultyBeatmapSetData.difficultyBeatmaps.TryGetValue(beatmapDifficulty, out difficultyBeatmapData))
+            if (!difficultyBeatmapSetData.difficultyBeatmaps.TryGetValue(beatmapDifficulty, out var difficultyBeatmapData))
                 return false;
 
             // Perform an additional check to make sure the level exists before attempting a copy.

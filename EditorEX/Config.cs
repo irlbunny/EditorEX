@@ -21,8 +21,6 @@ namespace EditorEX
         public virtual float SpectrogramXOffset { get; set; } = 1f;
         public virtual float SpectrogramWidth { get; set; } = .5f;
 
-        public virtual bool UseCustomNotePassedFeedback { get; set; } = true;
-
         public virtual void Changed()
         {
             Updated?.Invoke(this);

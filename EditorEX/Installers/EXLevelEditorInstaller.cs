@@ -1,4 +1,6 @@
 ﻿using EditorEX.AffinityPatches;
+using EditorEX.AudioSpectrogram.Colors;
+using EditorEX.AudioSpectrogram.Managers;
 using EditorEX.Managers;
 using Zenject;
 
@@ -11,11 +13,14 @@ namespace EditorEX.Installers
             // Patches
             Container.BindInterfacesTo<NoteTypeHelperPatch>().AsSingle();
 
+            // Audio Spectrogram
+            Container.Bind<IColorData>().To<InfernoColorData>().AsSingle();
+            Container.BindInterfacesAndSelfTo<SpectrogramManager>().AsSingle();
+
             // Managers
             Container.BindInterfacesAndSelfTo<CustomBeatmapObjectsToolbarViewManager>().AsSingle();
-            Container.BindInterfacesAndSelfTo<CustomEditorAudioFeedbackManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<EnvironmentGameObjectGroupManager>().AsSingle();
-            Container.BindInterfacesAndSelfTo<SpectrogramManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<EnvironmentGameObjectManager>().AsSingle();
         }
     }
 }
