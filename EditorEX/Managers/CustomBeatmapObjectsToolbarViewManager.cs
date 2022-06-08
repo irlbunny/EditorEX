@@ -42,7 +42,7 @@ namespace EditorEX.Managers
         {
             _config.Updated += Config_Updated;
 
-            EnableEnvironmentColors(_config.UseEnvironmentColors);
+            EnableEnvironmentColors(_config.UseColorScheme);
         }
 
         public void Dispose()
@@ -52,7 +52,7 @@ namespace EditorEX.Managers
 
         private void Config_Updated(Config config)
         {
-            EnableEnvironmentColors(_config.UseEnvironmentColors);
+            EnableEnvironmentColors(_config.UseColorScheme);
         }
 
         public void EnableEnvironmentColors(bool enabled)

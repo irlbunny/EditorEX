@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace EditorEX.Managers
 {
-    internal class EnvironmentGameObjectGroupManager
+    internal class EnvironmentGameObjectGroupManager : IDisposable
     {
         private readonly GameObject _environmentGameObject;
         private readonly Dictionary<string, GameObject[]> _groups = new();
@@ -12,6 +12,11 @@ namespace EditorEX.Managers
         public EnvironmentGameObjectGroupManager()
         {
             _environmentGameObject = GameObject.Find("Environment");
+        }
+
+        public void Dispose()
+        {
+            _groups.Clear();
         }
 
         public GameObject[] Get(string id)
@@ -51,8 +56,11 @@ namespace EditorEX.Managers
                 throw new Exception($"Group with ID \"{id}\" doesn't exist!");
 
             var gameObjects = _groups[id];
-            for (var i = 0; i < gameObjects.Length; i++)
-                gameObjects[i].SetActive(visible);
+            foreach (var gameObject in gameObjects)
+            {
+                if (gameObject != null)
+                    gameObject.SetActive(visible);
+            }
         }
     }
 }

@@ -14,13 +14,13 @@ namespace EditorEX.Managers
         {
             _config = config;
             _environmentGameObjectGroupManager = environmentGameObjectGroupManager;
-            _environmentGameObjectGroupManager.Add<Spectrogram>(SPECTROGRAM_GROUPID);
         }
 
         public void Initialize()
         {
             _config.Updated += Config_Updated;
 
+            _environmentGameObjectGroupManager.Add<Spectrogram>(SPECTROGRAM_GROUPID);
             _environmentGameObjectGroupManager.SetVisible(SPECTROGRAM_GROUPID, !_config.HideEnvironmentSpectrograms);
         }
 

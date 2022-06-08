@@ -18,7 +18,7 @@ namespace EditorEX.AffinityPatches
         [AffinityPatch(typeof(NoteTypeHelper), nameof(NoteTypeHelper.GetColorByNoteType)), AffinityPrefix]
         private bool GetColorByNoteType(ref Color __result, NoteType type)
         {
-            if (_config.UseEnvironmentColors && (type == NoteType.NoteA || type == NoteType.NoteB))
+            if (_config.UseColorScheme && (type == NoteType.NoteA || type == NoteType.NoteB))
             {
                 __result = _colorManager.ColorForType((ColorType) type);
                 return false;
