@@ -6,7 +6,7 @@ namespace EditorEX.HarmonyPatches
 {
     // Prevents a crash when exiting level editor without having any saves present.
     // Caused by entering a new difficulty and exiting without saving before placing any objects.
-    [HarmonyPatch(typeof(BeatmapProjectManager), "ReplaceBeatmapLevelFromLatestSave")]
+    [HarmonyPatch(typeof(BeatmapProjectManager), nameof(BeatmapProjectManager.ReplaceBeatmapLevelFromLatestSave))]
     internal class BeatmapProjectManagerReplaceBeatmapLevelFromLatestSave
     {
         private static bool Prefix(BeatmapCharacteristicSO beatmapCharacteristic, BeatmapDifficulty beatmapDifficulty,
@@ -16,11 +16,9 @@ namespace EditorEX.HarmonyPatches
             if (!____projectOpened)
                 return false;
 
-            IDifficultyBeatmapSetData difficultyBeatmapSetData;
-            if (!____beatmapDataModel.difficultyBeatmapSets.TryGetValue(beatmapCharacteristic, out difficultyBeatmapSetData))
+            if (!____beatmapDataModel.difficultyBeatmapSets.TryGetValue(beatmapCharacteristic, out var difficultyBeatmapSetData))
                 return false;
-            IDifficultyBeatmapData difficultyBeatmapData;
-            if (!difficultyBeatmapSetData.difficultyBeatmaps.TryGetValue(beatmapDifficulty, out difficultyBeatmapData))
+            if (!difficultyBeatmapSetData.difficultyBeatmaps.TryGetValue(beatmapDifficulty, out var difficultyBeatmapData))
                 return false;
 
             // Perform an additional check to make sure the level exists before attempting a copy.

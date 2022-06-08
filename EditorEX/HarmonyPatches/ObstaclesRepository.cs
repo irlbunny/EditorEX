@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace EditorEX.HarmonyPatches
 {
     // Fixes some exceptions with loading obstacles with negative duration.
-    [HarmonyPatch(typeof(ObstaclesRepository), "Add", typeof(ObstacleEditorData))]
+    [HarmonyPatch(typeof(ObstaclesRepository), nameof(ObstaclesRepository.Add), typeof(ObstacleEditorData))]
     internal class ObstaclesRepositoryAdd
     {
         private static bool Prefix(ObstacleEditorData obstacle, IntervalTree<float, ObstacleEditorData> ____tree, IDictionary<BeatmapEditorObjectId, ObstacleEditorData> ____dictionary)

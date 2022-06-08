@@ -14,16 +14,15 @@ namespace EditorEX.BeatmapFilter
             if (string.IsNullOrWhiteSpace(text))
                 return beatmapInfos;
 
-            var texts = text.Split(' ');
+            var terms = text.Split(' ');
             var beatmapSortInfos = new List<BeatmapSortInfo>();
 
             foreach (var beatmapInfo in beatmapInfos)
             {
                 var points = 0;
-
-                for (var i = 0; i < texts.Length; i++)
+                for (var i = 0; i < terms.Length; i++)
                 {
-                    var term = texts[i];
+                    var term = terms[i];
                     if (!string.IsNullOrWhiteSpace(term))
                     {
                         if (beatmapInfo.songSubName.IndexOf(term, 0, StringComparison.CurrentCultureIgnoreCase) != -1)
@@ -46,7 +45,7 @@ namespace EditorEX.BeatmapFilter
 
             beatmapSortInfos.Sort((x, y) => y.Points.CompareTo(x.Points));
 
-            return beatmapSortInfos.Select((info) => info.Data).ToList();
+            return beatmapSortInfos.Select((info) => info.BeatmapInfoData).ToList();
         }
 
         public static void Filter(this BeatmapsListViewController instance, string text)
