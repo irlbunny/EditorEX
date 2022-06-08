@@ -3,9 +3,9 @@
   "id": "EditorEX",
   "name": "EditorEX",
   "author": "Kaitlyn",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A modification of the base-game beatmap editor, which EXtends and adds useful features!",
-  "gameVersion": "1.22.0",
+  "gameVersion": "1.22.1",
   "dependsOn": {
     "BSIPA": "^4.2.2",
     "BeatSaberMarkupLanguage": "^1.6.0",
