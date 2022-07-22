@@ -48,13 +48,10 @@ namespace EditorEX.AudioSpectrogram.Managers
         public void Initialize()
         {
             _config.Updated += Config_Updated;
-
             _signalBus.Subscribe<LevelEditorStateZenModeUpdatedSignal>(HandleLevelEditorStateZenModeUpdated);
 
             InitializeChunks(_beatmapDataModel.audioClip);
-
-            if (!_levelEditorState.zenMode)
-                SetVisible(_config.ShowSpectrogram);
+            SetVisible(!_levelEditorState.zenMode && _config.ShowSpectrogram);
         }
 
         private void InitializeChunks(AudioClip audioClip)
@@ -224,7 +221,6 @@ namespace EditorEX.AudioSpectrogram.Managers
         public void Dispose()
         {
             _config.Updated -= Config_Updated;
-
             _signalBus.TryUnsubscribe<LevelEditorStateZenModeUpdatedSignal>(HandleLevelEditorStateZenModeUpdated);
 
             UnityEngine.Object.Destroy(_spectrogramContainer); // When we destroy the container, we're also destroying all chunks.
@@ -237,8 +233,7 @@ namespace EditorEX.AudioSpectrogram.Managers
 
         private void Config_Updated(Config config)
         {
-            if (!_levelEditorState.zenMode)
-                SetVisible(config.ShowSpectrogram);
+            SetVisible(!_levelEditorState.zenMode && _config.ShowSpectrogram);
 
             if (_spectrogramContainer != null)
             {
@@ -249,8 +244,7 @@ namespace EditorEX.AudioSpectrogram.Managers
 
         private void HandleLevelEditorStateZenModeUpdated()
         {
-            if (_config.ShowSpectrogram)
-                SetVisible(!_levelEditorState.zenMode);
+            SetVisible(!_levelEditorState.zenMode && _config.ShowSpectrogram);
         }
 
         public void SetVisible(bool visible)

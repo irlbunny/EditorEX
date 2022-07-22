@@ -20,6 +20,7 @@ namespace EditorEX.BeatmapFilter
             foreach (var beatmapInfo in beatmapInfos)
             {
                 var points = 0;
+
                 for (var i = 0; i < terms.Length; i++)
                 {
                     var term = terms[i];

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditorEX", "EditorEX\EditorEX.csproj", "{580D9F93-F5C4-449D-A5C8-4ACA2E18874B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EditorEX", "EditorEX\EditorEX.csproj", "{580D9F93-F5C4-449D-A5C8-4ACA2E18874B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "websocket-sharp", "websocket-sharp\websocket-sharp\websocket-sharp.csproj", "{94440B61-D408-4C4F-BFCB-BA49FE9B598B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{580D9F93-F5C4-449D-A5C8-4ACA2E18874B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{580D9F93-F5C4-449D-A5C8-4ACA2E18874B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{580D9F93-F5C4-449D-A5C8-4ACA2E18874B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94440B61-D408-4C4F-BFCB-BA49FE9B598B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94440B61-D408-4C4F-BFCB-BA49FE9B598B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94440B61-D408-4C4F-BFCB-BA49FE9B598B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94440B61-D408-4C4F-BFCB-BA49FE9B598B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

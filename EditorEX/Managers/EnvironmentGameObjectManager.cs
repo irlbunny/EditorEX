@@ -19,7 +19,6 @@ namespace EditorEX.Managers
         public void Initialize()
         {
             _config.Updated += Config_Updated;
-
             _environmentGameObjectGroupManager.Add<Spectrogram>(SPECTROGRAM_GROUPID);
             _environmentGameObjectGroupManager.SetVisible(SPECTROGRAM_GROUPID, !_config.HideEnvironmentSpectrograms);
         }
@@ -27,7 +26,6 @@ namespace EditorEX.Managers
         public void Dispose()
         {
             _config.Updated -= Config_Updated;
-
             _environmentGameObjectGroupManager.SetVisible(SPECTROGRAM_GROUPID, true); // Reset to default state.
         }
 
