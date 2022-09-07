@@ -17,6 +17,7 @@ namespace EditorEX.AudioSpectrogram.Managers
         private const float SECONDS_PER_CHUNK = 5f;
         private const uint SAMPLE_COUNT = 512;
         private const int GRADIENT_FACTOR = 25;
+        private const float DEFAULT_X_OFFSET = -7f;
 
         private readonly Config _config;
         private readonly SignalBus _signalBus;
@@ -119,7 +120,6 @@ namespace EditorEX.AudioSpectrogram.Managers
                     {
                         if (value >= Math.Pow(Math.E, -255d / GRADIENT_FACTOR))
                             return (float) ((Math.Log(value) + (255d / GRADIENT_FACTOR)) * GRADIENT_FACTOR) / 128f;
-
                         return 0f;
                     }).ToArray();
 
@@ -129,7 +129,6 @@ namespace EditorEX.AudioSpectrogram.Managers
                         var r = _colorData.Data[(int) Math.Round(255f * lerp), 0];
                         var g = _colorData.Data[(int) Math.Round(255f * lerp), 1];
                         var b = _colorData.Data[(int) Math.Round(255f * lerp), 2];
-
                         return new Color(r, g, b, 1f);
                     }).ToArray();
                 }
@@ -170,7 +169,7 @@ namespace EditorEX.AudioSpectrogram.Managers
                 spectrogramBundle.Unload(false);
 
                 _spectrogramContainer = new GameObject("SpectrogramContainer");
-                _spectrogramContainer.transform.position = new(-7f + _config.SpectrogramXOffset, 0f, 0f);
+                _spectrogramContainer.transform.position = new(DEFAULT_X_OFFSET + _config.SpectrogramXOffset, 0f, 0f);
                 _spectrogramContainer.transform.localScale = new(_config.SpectrogramWidth, 1f, 1f);
 
                 // Create a clone of BeatmapObjectsContainer beatline.

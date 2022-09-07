@@ -2,6 +2,7 @@
 using EditorEX.AudioSpectrogram.Colors;
 using EditorEX.AudioSpectrogram.Managers;
 using EditorEX.Managers;
+using System;
 using Zenject;
 
 namespace EditorEX.Installers
@@ -10,11 +11,30 @@ namespace EditorEX.Installers
     {
         public override void InstallBindings()
         {
+            var config = Container.Resolve<Config>();
+
             // Patches
             Container.BindInterfacesTo<NoteTypeHelperPatch>().AsSingle();
 
             // Audio Spectrogram
-            Container.Bind<IColorData>().To<InfernoColorData>().AsSingle();
+#pragma warning disable IDE0059
+            Type colorDataType = null;
+#pragma warning restore IDE0059
+            switch (config.SpectrogramColor)
+            {
+                case Config.SpectrogramColorConfig.Inferno:
+                    colorDataType = typeof(InfernoColorData);
+                    break;
+
+                case Config.SpectrogramColorConfig.Poison:
+                    colorDataType = typeof(PoisonColorData);
+                    break;
+
+                default:
+                    throw new Exception("Unknown spectrogram color when attempting to bind IColorData type.");
+            }
+
+            Container.Bind<IColorData>().To(colorDataType).AsSingle();
             Container.BindInterfacesAndSelfTo<SpectrogramManager>().AsSingle();
 
             // Managers
