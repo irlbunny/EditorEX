@@ -30,6 +30,9 @@ namespace EditorEX
                 container.BindInstance(new UBinder<Plugin, PluginMetadata>(metadata));
             });
 
+            zenjector.Expose<BeatmapEditorScreenSystem>("BeatmapEditor3D");
+
+            zenjector.Install<EXEditorMainInstaller, BeatmapEditorMainInstaller>();
             zenjector.Install<EXLevelEditorInstaller, BeatmapLevelEditorInstaller>();
         }
 

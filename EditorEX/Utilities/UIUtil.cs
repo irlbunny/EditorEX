@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Zenject;
 
 namespace EditorEX.Utilities
 {
@@ -57,7 +58,7 @@ namespace EditorEX.Utilities
             }
         }
 
-        public static TMP_InputField CreateInputField(Label label, Transform parent, string value, Vector2 localPosition, Vector2 sizeDelta, UnityAction<string> action)
+        public static TMP_InputField CreateInputField(Label label, Transform parent, Vector2 localPosition, Vector2 sizeDelta, UnityAction<string> action)
         {
             var templateObject = GameObject.Find("Wrapper/ViewControllers/EditBeatmapViewController/BeatmapInfoContainer/SongInfo/SongNameInput");
             if (templateObject == null)
@@ -86,7 +87,7 @@ namespace EditorEX.Utilities
             }
 
             var inputField = inputFieldGameObject.transform.Find("InputField").GetComponent<TMP_InputField>();
-            inputField.text = value;
+            inputField.text = string.Empty;
             inputField.onValueChanged.RemoveAllListeners();
             inputField.onValueChanged.AddListener(action);
 
@@ -94,6 +95,26 @@ namespace EditorEX.Utilities
             UnityEngine.Object.Destroy(inputFieldGameObject.transform.Find("ModifiedHint").gameObject);
 
             return inputField;
+        }
+
+        public static Button CreateNavbarButton(DiContainer container, Sprite icon, Transform parent, UnityAction action)
+        {
+            var templateObject = GameObject.Find("Wrapper/ScreenSystem/ScreenContainer/Navbar/NavbarScreen/EditorControlsViewController/ProjectButtons/BeatmapsListButton");
+            if (templateObject == null)
+                throw new NullReferenceException("Failed to get Button template!");
+
+            var navbarButtonGameObject = container.InstantiatePrefab(templateObject);
+            navbarButtonGameObject.transform.SetParent(parent, false);
+
+            if (icon != null)
+                navbarButtonGameObject.transform.Find("Icon").gameObject.GetComponent<ImageView>().sprite = icon;
+
+            var navbarButton = navbarButtonGameObject.GetComponent<NoTransitionsButton>();
+            navbarButton.onClick.RemoveAllListeners();
+            navbarButton.onClick.AddListener(action);
+            navbarButton.enabled = true;
+
+            return navbarButton;
         }
     }
 }

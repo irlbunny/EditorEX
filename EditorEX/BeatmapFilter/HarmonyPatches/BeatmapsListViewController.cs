@@ -18,7 +18,7 @@ namespace EditorEX.HarmonyPatches
         {
             if (firstActivation)
             {
-                FilterInput = UIUtil.CreateInputField(new(BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("EditorEX.Resources.filter.png")), __instance.transform, string.Empty, new(-950f, 130f), new(400f, 40f), (value) =>
+                FilterInput = UIUtil.CreateInputField(new(BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("EditorEX.Resources.filter.png")), __instance.transform, new(-950f, 130f), new(400f, 40f), (value) =>
                 {
                     __instance.Filter(value);
                 });
