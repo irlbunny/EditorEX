@@ -13,34 +13,31 @@ namespace EditorEX.UI
         private static AccessTools.FieldRef<BeatmapEditorViewController, BeatmapEditorViewRelationData> _viewRelationDataAccessor =
             AccessTools.FieldRefAccess<BeatmapEditorViewController, BeatmapEditorViewRelationData>("_viewRelationData");
 
-        private void Awake()
+        protected CustomBeatmapEditorViewController()
         {
-            gameObject.SetActive(false);
-            gameObject.AddComponent<Canvas>();
-            gameObject.AddComponent<GraphicRaycaster>();
             _viewRelationDataAccessor(this) = new();
         }
 
         protected GameObject CreateTextGameObject(string name, string text, Vector2 localPosition, Vector2 sizeDelta)
         {
-            var textGO = new GameObject(name, typeof(RectTransform));
-            textGO.transform.SetParent(transform, false);
-            textGO.transform.localPosition = localPosition;
-            StartCoroutine(DelayedSizeDelta(textGO.GetComponent<RectTransform>(), sizeDelta));
-            var textTMP = textGO.AddComponent<TextMeshProUGUI>();
+            var textGameObject = new GameObject(name, typeof(RectTransform));
+            textGameObject.transform.SetParent(transform, false);
+            textGameObject.transform.localPosition = localPosition;
+            StartCoroutine(DelayedSizeDelta(textGameObject.GetComponent<RectTransform>(), sizeDelta));
+            var textTMP = textGameObject.AddComponent<TextMeshProUGUI>();
             textTMP.font = BeatSaberMarkupLanguage.BeatSaberUI.MainTextFont;
             textTMP.text = text;
-            return textGO;
+            return textGameObject;
         }
 
         protected GameObject CreateImageGameObject(string name, Sprite image, Vector2 localPosition, Vector2 sizeDelta)
         {
-            var imageGO = new GameObject(name, typeof(RectTransform));
-            imageGO.transform.SetParent(transform, false);
-            imageGO.transform.localPosition = localPosition;
-            StartCoroutine(DelayedSizeDelta(imageGO.GetComponent<RectTransform>(), sizeDelta));
-            imageGO.AddComponent<Image>().sprite = image;
-            return imageGO;
+            var imageGameObject = new GameObject(name, typeof(RectTransform));
+            imageGameObject.transform.SetParent(transform, false);
+            imageGameObject.transform.localPosition = localPosition;
+            StartCoroutine(DelayedSizeDelta(imageGameObject.GetComponent<RectTransform>(), sizeDelta));
+            imageGameObject.AddComponent<Image>().sprite = image;
+            return imageGameObject;
         }
 
         // Weird hack, thanks Unity, you stink!

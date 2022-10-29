@@ -1,12 +1,9 @@
 ﻿using BeatmapEditor3D;
-using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.BeatmapEditor;
+using EditorEX.UI;
 using EditorEX.Utilities;
-using EditorEX.Views;
 using HarmonyLib;
 using IPA.Utilities;
 using System;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,21 +22,19 @@ namespace EditorEX.Managers
             AccessTools.FieldRefAccess<BeatmapEditorMainNavigationViewController, Button>("_beatmapsListButton");
 
         private readonly DiContainer _container;
-        //private readonly TributesCreditsViewController _tributesCreditsViewController;
         private readonly MainBeatmapEditorFlowCoordinator _mainBeatmapEditorFlowCoordinator;
         private readonly BeatmapEditorMainNavigationViewController _beatmapEditorMainNavigationViewController;
         private readonly GameObject _projectButtonsGameObject;
 
+        private TributesCreditsViewController _tributesCreditsViewController;
         private Button _tributesCreditsButton;
 
         public CustomBeatmapEditorMainNavigationManager(
             DiContainer container,
-            //TributesCreditsViewController tributesCreditsViewController,
             MainBeatmapEditorFlowCoordinator mainBeatmapEditorFlowCoordinator,
             BeatmapEditorMainNavigationViewController beatmapEditorMainNavigationViewController)
         {
             _container = container;
-            //_tributesCreditsViewController = tributesCreditsViewController;
             _mainBeatmapEditorFlowCoordinator = mainBeatmapEditorFlowCoordinator;
             _beatmapEditorMainNavigationViewController = beatmapEditorMainNavigationViewController;
             _projectButtonsGameObject = beatmapEditorMainNavigationViewController.transform.Find("ProjectButtons").gameObject;
@@ -59,10 +54,13 @@ namespace EditorEX.Managers
 
         private void BeatmapEditorMainNavigationViewController_didActivateEvent(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
+            if (_tributesCreditsViewController == null)
+                _tributesCreditsViewController = UIUtil.CreateViewController<TributesCreditsViewController>();
+
             if (_tributesCreditsButton == null)
             {
-                var heartImage = BeatSaberMarkupLanguage.Utilities.GetResource(Assembly.GetExecutingAssembly(), "EditorEX.Resources.heart.png");
-                _tributesCreditsButton = UIUtil.CreateNavbarButton(_container, BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(heartImage), _projectButtonsGameObject.transform, HandleTributesCreditsButtonPressed);
+                var heartSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("EditorEX.Resources.heart.png");
+                _tributesCreditsButton = UIUtil.CreateNavbarButton(_container, heartSprite, _projectButtonsGameObject.transform, HandleTributesCreditsButtonPressed);
             }
         }
 
@@ -74,7 +72,7 @@ namespace EditorEX.Managers
         private void HandleTributesCreditsButtonPressed()
         {
             _tributesCreditsButton.enabled = false;
-            _replaceTopViewControllerAccessor(_mainBeatmapEditorFlowCoordinator, BeatSaberEditorUI.CreateViewController<TributesCreditsViewController>());
+            _replaceTopViewControllerAccessor(_mainBeatmapEditorFlowCoordinator, _tributesCreditsViewController);
             _setActiveNavButtonsAccessor(_beatmapEditorMainNavigationViewController, BeatmapEditorMainNavigationViewController.EditorControlsButtonType.BeatmapList);
             _beatmapsListButtonAccessor(_beatmapEditorMainNavigationViewController).enabled = true;
         }

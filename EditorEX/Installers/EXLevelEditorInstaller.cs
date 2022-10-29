@@ -21,13 +21,12 @@ namespace EditorEX.Installers
             Container.BindInterfacesTo<NoteTypeHelperPatch>().AsSingle();
 
             // Audio Spectrogram
-            Type colorDataType = config.SpectrogramColor switch
+            var colorDataType = config.SpectrogramColor switch
             {
                 Config.SpectrogramColorConfig.Inferno => typeof(InfernoColorData),
                 Config.SpectrogramColorConfig.Poison => typeof(PoisonColorData),
                 _ => throw new Exception("Unknown spectrogram color when attempting to bind IColorData type.")
             };
-
             Container.Bind<IColorData>().To(colorDataType).AsSingle();
             Container.BindInterfacesAndSelfTo<SpectrogramManager>().AsSingle();
 

@@ -1,6 +1,8 @@
 ﻿using BeatmapEditor3D;
+using BeatSaberMarkupLanguage;
 using HMUI;
 using System;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -57,6 +59,8 @@ namespace EditorEX.Utilities
                 _sprite = sprite;
             }
         }
+
+        private static Canvas _canvasTemplate;
 
         public static TMP_InputField CreateInputField(Label label, Transform parent, Vector2 localPosition, Vector2 sizeDelta, UnityAction<string> action)
         {
@@ -115,6 +119,25 @@ namespace EditorEX.Utilities
             navbarButton.enabled = true;
 
             return navbarButton;
+        }
+
+        public static T CreateViewController<T>() where T : BeatmapEditorViewController
+        {
+            if (_canvasTemplate == null)
+                _canvasTemplate = Resources.FindObjectsOfTypeAll<Canvas>().First(x => x.name == "BeatmapsListViewController");
+
+            var viewControllerGameObject = new GameObject(typeof(T).Name);
+            viewControllerGameObject.SetActive(false);
+            viewControllerGameObject.AddComponent(_canvasTemplate);
+            viewControllerGameObject.AddComponent<GraphicRaycaster>();
+
+            var viewController = viewControllerGameObject.AddComponent<T>();
+            viewController.rectTransform.anchorMin = new(0f, 0f);
+            viewController.rectTransform.anchorMax = new(1f, 1f);
+            viewController.rectTransform.sizeDelta = new(0f, 0f);
+            viewController.rectTransform.anchoredPosition = new(0f, 0f);
+
+            return viewController;
         }
     }
 }
