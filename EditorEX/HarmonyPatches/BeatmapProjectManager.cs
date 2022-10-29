@@ -9,9 +9,13 @@ namespace EditorEX.HarmonyPatches
     [HarmonyPatch(typeof(BeatmapProjectManager), nameof(BeatmapProjectManager.ReplaceBeatmapLevelFromLatestSave))]
     internal class BeatmapProjectManagerReplaceBeatmapLevelFromLatestSave
     {
-        private static bool Prefix(BeatmapCharacteristicSO beatmapCharacteristic, BeatmapDifficulty beatmapDifficulty,
-            bool ____projectOpened, IBeatmapDataModel ____beatmapDataModel,
-            string ____originalBeatmapProject, string ____workingBeatmapProject)
+        private static bool Prefix(
+            BeatmapCharacteristicSO beatmapCharacteristic,
+            BeatmapDifficulty beatmapDifficulty,
+            bool ____projectOpened,
+            IBeatmapDataModel ____beatmapDataModel,
+            string ____originalBeatmapProject,
+            string ____workingBeatmapProject)
         {
             if (!____projectOpened)
                 return false;

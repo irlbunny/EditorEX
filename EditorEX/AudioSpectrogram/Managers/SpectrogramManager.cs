@@ -32,9 +32,13 @@ namespace EditorEX.AudioSpectrogram.Managers
         private GameObject[] _spectrogramChunks;
         private Texture2D[] _bandColors;
 
-        public SpectrogramManager(Config config, SignalBus signalBus,
-            BeatmapObjectPlacementHelper beatmapObjectPlacementHelper, IBeatmapLevelState beatmapLevelState,
-            ILevelEditorState levelEditorState, IBeatmapDataModel beatmapDataModel,
+        public SpectrogramManager(
+            Config config,
+            SignalBus signalBus,
+            BeatmapObjectPlacementHelper beatmapObjectPlacementHelper,
+            IBeatmapLevelState beatmapLevelState,
+            ILevelEditorState levelEditorState,
+            IBeatmapDataModel beatmapDataModel,
             IColorData colorData)
         {
             _config = config;
@@ -67,14 +71,14 @@ namespace EditorEX.AudioSpectrogram.Managers
             for (var i = 0; i < multiChannelSamples.Length; i++)
                 processedSamples[i / audioClip.channels] = multiChannelSamples[i] / audioClip.channels;
 
-            var samples = (int) SAMPLE_COUNT / 2;
+            var samples = (int)SAMPLE_COUNT / 2;
             var samplesPerChunk = audioClip.frequency * SECONDS_PER_CHUNK;
-            var columnsPerChunk = (int) samplesPerChunk / samples;
+            var columnsPerChunk = (int)samplesPerChunk / samples;
             var sampleOffset = samplesPerChunk / columnsPerChunk;
             var sampleChunk = new double[SAMPLE_COUNT];
 
             // Initialize texture data.
-            var waveformChunks = (int) Math.Ceiling(audioClip.length / SECONDS_PER_CHUNK); // Number of "chunks" or texture segments produced.
+            var waveformChunks = (int)Math.Ceiling(audioClip.length / SECONDS_PER_CHUNK); // Number of "chunks" or texture segments produced.
             var waveformBandVolumes = new float[columnsPerChunk * waveformChunks][];
             var waveformBandColors = new Texture2D[waveformChunks];
             var waveformBandColorData = new NativeArray<Color32>[waveformChunks];
@@ -108,7 +112,7 @@ namespace EditorEX.AudioSpectrogram.Managers
                     }
 
                     // Load the samples into a chunk and perform FFT magnitude.
-                    Buffer.BlockCopy(processedSamples, (int) (i * sampleOffset) * sizeof(double), sampleChunk, 0, ((int) SAMPLE_COUNT) * sizeof(double));
+                    Buffer.BlockCopy(processedSamples, (int)(i * sampleOffset) * sizeof(double), sampleChunk, 0, ((int)SAMPLE_COUNT) * sizeof(double));
                     var fftSpectrum = fft.Execute(DSP.Math.Multiply(sampleChunk, windowCoefs));
                     var scaledFftSpectrum = DSP.Math.Multiply(DSP.ConvertComplex.ToMagnitude(fftSpectrum), scaleFactor);
 
@@ -119,16 +123,16 @@ namespace EditorEX.AudioSpectrogram.Managers
                     waveformBandVolumes[i] = scaledFftSpectrum.Select(value =>
                     {
                         if (value >= Math.Pow(Math.E, -255d / GRADIENT_FACTOR))
-                            return (float) ((Math.Log(value) + (255d / GRADIENT_FACTOR)) * GRADIENT_FACTOR) / 128f;
+                            return (float)((Math.Log(value) + (255d / GRADIENT_FACTOR)) * GRADIENT_FACTOR) / 128f;
                         return 0f;
                     }).ToArray();
 
                     bandColors[k] = waveformBandVolumes[i].Select(value =>
                     {
                         var lerp = Mathf.InverseLerp(0f, 2f, value);
-                        var r = _colorData.Data[(int) Math.Round(255f * lerp), 0];
-                        var g = _colorData.Data[(int) Math.Round(255f * lerp), 1];
-                        var b = _colorData.Data[(int) Math.Round(255f * lerp), 2];
+                        var r = _colorData.Data[(int)Math.Round(255f * lerp), 0];
+                        var g = _colorData.Data[(int)Math.Round(255f * lerp), 1];
+                        var b = _colorData.Data[(int)Math.Round(255f * lerp), 2];
                         return new Color(r, g, b, 1f);
                     }).ToArray();
                 }
@@ -155,8 +159,8 @@ namespace EditorEX.AudioSpectrogram.Managers
             var startTime = _beatmapDataModel.bpmData.BeatToTime(_beatmapLevelState.beat);
             var endTime = _beatmapDataModel.bpmData.BeatToTime(_beatmapLevelState.beat + 16f);
 
-            var firstSpectrogram = (int) Math.Floor(startTime / SECONDS_PER_CHUNK) - 1;
-            var lastSpectrogram = (int) Math.Ceiling(endTime / SECONDS_PER_CHUNK);
+            var firstSpectrogram = (int)Math.Floor(startTime / SECONDS_PER_CHUNK) - 1;
+            var lastSpectrogram = (int)Math.Ceiling(endTime / SECONDS_PER_CHUNK);
 
             firstSpectrogram = Math.Max(0, firstSpectrogram);
             lastSpectrogram = Math.Min(lastSpectrogram, _bandColors.Length - 1);
@@ -209,7 +213,7 @@ namespace EditorEX.AudioSpectrogram.Managers
                 _spectrogramChunks[i].SetActive(false);
             for (var i = firstSpectrogram; i < lastSpectrogram; i++)
             {
-                var z = _beatmapObjectPlacementHelper.TimeToPosition(((float) (i * SECONDS_PER_CHUNK)) - startTime);
+                var z = _beatmapObjectPlacementHelper.TimeToPosition(((float)(i * SECONDS_PER_CHUNK)) - startTime);
 
                 _spectrogramChunks[i].transform.localPosition = new(0f, .01f, z + (_beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 2f));
                 _spectrogramChunks[i].transform.localScale = new(_beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 10f, 1f, -.5f);

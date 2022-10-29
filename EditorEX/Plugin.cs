@@ -16,11 +16,15 @@ namespace EditorEX
     public class Plugin
     {
         internal const string HARMONYID = "com.github.ItsKaitlyn03.EditorEX";
+
+        internal static IPALogger Log { get; private set; }
         internal static Harmony HarmonyInstance { get; private set; } = new(HARMONYID);
 
         [Init]
         public Plugin(IPALogger logger, IPAConfig conf, PluginMetadata metadata, Zenjector zenjector)
         {
+            Log = logger;
+
             zenjector.UseLogger(logger);
 
             var config = conf.Generated<Config>();
@@ -29,8 +33,6 @@ namespace EditorEX
                 container.BindInstance(config).AsSingle();
                 container.BindInstance(new UBinder<Plugin, PluginMetadata>(metadata));
             });
-
-            zenjector.Expose<BeatmapEditorScreenSystem>("BeatmapEditor3D");
 
             zenjector.Install<EXEditorMainInstaller, BeatmapEditorMainInstaller>();
             zenjector.Install<EXLevelEditorInstaller, BeatmapLevelEditorInstaller>();

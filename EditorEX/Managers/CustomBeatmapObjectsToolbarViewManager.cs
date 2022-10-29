@@ -13,7 +13,6 @@ namespace EditorEX.Managers
     {
         private static AccessTools.FieldRef<EditBeatmapLevelNavigationViewController, BeatmapObjectsToolbarView> _beatmapObjectsToolbarViewAccessor =
             AccessTools.FieldRefAccess<EditBeatmapLevelNavigationViewController, BeatmapObjectsToolbarView>("_beatmapObjectsToolbarView");
-
         private static AccessTools.FieldRef<BeatmapObjectsToolbarView, Toggle> _noteAToggleAccessor =
             AccessTools.FieldRefAccess<BeatmapObjectsToolbarView, Toggle>("_noteAToggle");
         private static AccessTools.FieldRef<BeatmapObjectsToolbarView, Toggle> _noteBToggleAccessor =
@@ -26,7 +25,10 @@ namespace EditorEX.Managers
         private readonly Sprite _originalNoteASprite, _originalNoteBSprite;
         private readonly Sprite _customNoteSprite;
 
-        public CustomBeatmapObjectsToolbarViewManager(Config config, ColorManager colorManager, EditBeatmapLevelNavigationViewController editBeatmapLevelNavigationViewController)
+        public CustomBeatmapObjectsToolbarViewManager(
+            Config config,
+            ColorManager colorManager,
+            EditBeatmapLevelNavigationViewController editBeatmapLevelNavigationViewController)
         {
             _config = config;
             _colorManager = colorManager;

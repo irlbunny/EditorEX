@@ -20,7 +20,7 @@ namespace EditorEX.AffinityPatches
         {
             if (_config.UseColorScheme && (type == NoteType.NoteA || type == NoteType.NoteB))
             {
-                __result = _colorManager.ColorForType((ColorType) type);
+                __result = _colorManager.ColorForType((ColorType)type);
                 return false;
             }
 

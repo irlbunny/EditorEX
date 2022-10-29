@@ -9,15 +9,8 @@ namespace EditorEX.Installers
     {
         public override void InstallBindings()
         {
-            var beatmapEditorScreen = Container.Resolve<BeatmapEditorScreenSystem>().mainScreen;
-
-            Container.BindInterfacesAndSelfTo<TributesCreditsViewController>()
-                .FromNewComponentOnNewGameObject()
-                .WithGameObjectName("TributesCreditsViewController")
-                .UnderTransform(beatmapEditorScreen.transform)
-                .AsSingle()
-                .NonLazy();
-            Container.BindInterfacesAndSelfTo<CustomNavigationViewManager>().AsSingle();
+            // Managers
+            Container.BindInterfacesAndSelfTo<CustomBeatmapEditorMainNavigationManager>().AsSingle();
         }
     }
 }
