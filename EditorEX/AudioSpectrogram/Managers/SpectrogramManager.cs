@@ -156,11 +156,11 @@ namespace EditorEX.AudioSpectrogram.Managers
                 return;
 
             // startTimeBeats is 5 beats behind the current beat.
-            var startTime = _beatmapDataModel.bpmData.BeatToTime(_beatmapLevelState.beat);
-            var endTime = _beatmapDataModel.bpmData.BeatToTime(_beatmapLevelState.beat + 16f);
+            var startSeconds = _beatmapDataModel.bpmData.BeatToSeconds(_beatmapLevelState.beat);
+            var endSeconds = _beatmapDataModel.bpmData.BeatToSeconds(_beatmapLevelState.beat + 16f);
 
-            var firstSpectrogram = (int)Math.Floor(startTime / SECONDS_PER_CHUNK) - 1;
-            var lastSpectrogram = (int)Math.Ceiling(endTime / SECONDS_PER_CHUNK);
+            var firstSpectrogram = (int)Math.Floor(startSeconds / SECONDS_PER_CHUNK) - 1;
+            var lastSpectrogram = (int)Math.Ceiling(endSeconds / SECONDS_PER_CHUNK);
 
             firstSpectrogram = Math.Max(0, firstSpectrogram);
             lastSpectrogram = Math.Min(lastSpectrogram, _bandColors.Length - 1);
@@ -213,7 +213,7 @@ namespace EditorEX.AudioSpectrogram.Managers
                 _spectrogramChunks[i].SetActive(false);
             for (var i = firstSpectrogram; i < lastSpectrogram; i++)
             {
-                var z = _beatmapObjectPlacementHelper.TimeToPosition(((float)(i * SECONDS_PER_CHUNK)) - startTime);
+                var z = _beatmapObjectPlacementHelper.TimeToPosition(((float)(i * SECONDS_PER_CHUNK)) - startSeconds);
 
                 _spectrogramChunks[i].transform.localPosition = new(0f, .01f, z + (_beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 2f));
                 _spectrogramChunks[i].transform.localScale = new(_beatmapObjectPlacementHelper.timeToZDistanceScale * SECONDS_PER_CHUNK / 10f, 1f, -.5f);

@@ -1,6 +1,4 @@
-﻿using BeatmapEditor3D;
-using EditorEX.Managers;
-using EditorEX.UI;
+﻿using EditorEX.Managers;
 using Zenject;
 
 namespace EditorEX.Installers
