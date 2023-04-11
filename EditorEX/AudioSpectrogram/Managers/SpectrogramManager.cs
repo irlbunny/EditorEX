@@ -21,9 +21,9 @@ namespace EditorEX.AudioSpectrogram.Managers
 
         private readonly Config _config;
         private readonly SignalBus _signalBus;
+        private readonly BeatmapState _beatmapState;
         private readonly BeatmapObjectPlacementHelper _beatmapObjectPlacementHelper;
-        private readonly IBeatmapLevelState _beatmapLevelState;
-        private readonly ILevelEditorState _levelEditorState;
+        private readonly BeatmapEditorSettingsDataModel _beatmapEditorSettingsDataModel;
         private readonly IBeatmapDataModel _beatmapDataModel;
         private readonly IColorData _colorData;
 
@@ -35,17 +35,17 @@ namespace EditorEX.AudioSpectrogram.Managers
         public SpectrogramManager(
             Config config,
             SignalBus signalBus,
+            BeatmapState beatmapState,
             BeatmapObjectPlacementHelper beatmapObjectPlacementHelper,
-            IBeatmapLevelState beatmapLevelState,
-            ILevelEditorState levelEditorState,
+            BeatmapEditorSettingsDataModel beatmapEditorSettingsDataModel,
             IBeatmapDataModel beatmapDataModel,
             IColorData colorData)
         {
             _config = config;
             _signalBus = signalBus;
+            _beatmapState = beatmapState;
             _beatmapObjectPlacementHelper = beatmapObjectPlacementHelper;
-            _beatmapLevelState = beatmapLevelState;
-            _levelEditorState = levelEditorState;
+            _beatmapEditorSettingsDataModel = beatmapEditorSettingsDataModel;
             _beatmapDataModel = beatmapDataModel;
             _colorData = colorData;
         }
@@ -56,7 +56,7 @@ namespace EditorEX.AudioSpectrogram.Managers
             _signalBus.Subscribe<LevelEditorStateZenModeUpdatedSignal>(HandleLevelEditorStateZenModeUpdated);
 
             InitializeChunks(_beatmapDataModel.audioClip);
-            SetVisible(!_levelEditorState.zenMode && _config.ShowSpectrogram);
+            SetVisible(!_beatmapEditorSettingsDataModel.zenMode && _config.ShowSpectrogram);
         }
 
         private void InitializeChunks(AudioClip audioClip)
@@ -156,8 +156,8 @@ namespace EditorEX.AudioSpectrogram.Managers
                 return;
 
             // startTimeBeats is 5 beats behind the current beat.
-            var startSeconds = _beatmapDataModel.bpmData.BeatToSeconds(_beatmapLevelState.beat);
-            var endSeconds = _beatmapDataModel.bpmData.BeatToSeconds(_beatmapLevelState.beat + 16f);
+            var startSeconds = _beatmapDataModel.bpmData.BeatToSeconds(_beatmapState.beat);
+            var endSeconds = _beatmapDataModel.bpmData.BeatToSeconds(_beatmapState.beat + 16f);
 
             var firstSpectrogram = (int)Math.Floor(startSeconds / SECONDS_PER_CHUNK) - 1;
             var lastSpectrogram = (int)Math.Ceiling(endSeconds / SECONDS_PER_CHUNK);
@@ -236,7 +236,7 @@ namespace EditorEX.AudioSpectrogram.Managers
 
         private void Config_Updated(Config config)
         {
-            SetVisible(!_levelEditorState.zenMode && _config.ShowSpectrogram);
+            SetVisible(!_beatmapEditorSettingsDataModel.zenMode && _config.ShowSpectrogram);
 
             if (_spectrogramContainer != null)
             {
@@ -247,7 +247,7 @@ namespace EditorEX.AudioSpectrogram.Managers
 
         private void HandleLevelEditorStateZenModeUpdated()
         {
-            SetVisible(!_levelEditorState.zenMode && _config.ShowSpectrogram);
+            SetVisible(!_beatmapEditorSettingsDataModel.zenMode && _config.ShowSpectrogram);
         }
 
         public void SetVisible(bool visible)

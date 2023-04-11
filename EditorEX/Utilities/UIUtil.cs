@@ -64,13 +64,9 @@ namespace EditorEX.Utilities
 
         public static TMP_InputField CreateInputField(Label label, Transform parent, Vector2 localPosition, Vector2 sizeDelta, UnityAction<string> action)
         {
-            var templateObject = GameObject.Find("Wrapper/ViewControllers/EditBeatmapViewController/BeatmapInfoContainer/SongInfo/SongNameInput");
+            var templateObject = GameObject.Find("Wrapper/ViewControllers/EditBeatmapLevelViewController/BeatmapInfoContainer/SongInfo/SongNameInput");
             if (templateObject == null)
-            {
-                templateObject = GameObject.Find("Wrapper/ScreenSystem/ScreenContainer/MainScreen/EditBeatmapViewController/BeatmapInfoContainer/SongInfo/SongNameInput");
-                if (templateObject == null)
-                    throw new NullReferenceException("Failed to get InputField template!");
-            }
+                throw new NullReferenceException("Failed to get InputField template!");
 
             var inputFieldGameObject = UnityEngine.Object.Instantiate(templateObject, parent, false);
             inputFieldGameObject.transform.localPosition = localPosition;
@@ -103,7 +99,7 @@ namespace EditorEX.Utilities
 
         public static Button CreateNavbarButton(DiContainer container, Sprite icon, Transform parent, UnityAction action)
         {
-            var templateObject = GameObject.Find("Wrapper/ScreenSystem/ScreenContainer/Navbar/NavbarScreen/EditorControlsViewController/ProjectButtons/BeatmapsListButton");
+            var templateObject = GameObject.Find("Wrapper/ScreenSystem/ScreenContainer/Navbar/NavbarScreen/BeatmapEditorMainNavigationViewController/ProjectButtons/BeatmapsListButton");
             if (templateObject == null)
                 throw new NullReferenceException("Failed to get Button template!");
 

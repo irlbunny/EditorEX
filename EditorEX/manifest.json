@@ -3,12 +3,12 @@
   "id": "EditorEX",
   "name": "EditorEX",
   "author": "Kaitlyn",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "A modification of the base-game beatmap editor, which EXtends and adds useful features!",
-  "gameVersion": "1.26.0",
+  "gameVersion": "1.29.0",
   "dependsOn": {
     "BSIPA": "^4.2.2",
-    "BeatSaberMarkupLanguage": "^1.6.8",
+    "BeatSaberMarkupLanguage": "^1.6.10",
     "SiraUtil": "^3.1.2"
   }
 }

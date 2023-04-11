@@ -11,8 +11,8 @@ namespace EditorEX.Managers
 {
     internal class CustomBeatmapObjectsToolbarViewManager : IInitializable, IDisposable
     {
-        private static AccessTools.FieldRef<EditBeatmapLevelNavigationViewController, BeatmapObjectsToolbarView> _beatmapObjectsToolbarViewAccessor =
-            AccessTools.FieldRefAccess<EditBeatmapLevelNavigationViewController, BeatmapObjectsToolbarView>("_beatmapObjectsToolbarView");
+        private static AccessTools.FieldRef<EditBeatmapNavigationViewController, BeatmapObjectsToolbarView> _beatmapObjectsToolbarViewAccessor =
+            AccessTools.FieldRefAccess<EditBeatmapNavigationViewController, BeatmapObjectsToolbarView>("_beatmapObjectsToolbarView");
         private static AccessTools.FieldRef<BeatmapObjectsToolbarView, Toggle> _noteAToggleAccessor =
             AccessTools.FieldRefAccess<BeatmapObjectsToolbarView, Toggle>("_noteAToggle");
         private static AccessTools.FieldRef<BeatmapObjectsToolbarView, Toggle> _noteBToggleAccessor =
@@ -28,11 +28,11 @@ namespace EditorEX.Managers
         public CustomBeatmapObjectsToolbarViewManager(
             Config config,
             ColorManager colorManager,
-            EditBeatmapLevelNavigationViewController editBeatmapLevelNavigationViewController)
+            EditBeatmapNavigationViewController editBeatmapNavigationViewController)
         {
             _config = config;
             _colorManager = colorManager;
-            _beatmapObjectsToolbarView = _beatmapObjectsToolbarViewAccessor(editBeatmapLevelNavigationViewController);
+            _beatmapObjectsToolbarView = _beatmapObjectsToolbarViewAccessor(editBeatmapNavigationViewController);
             _noteAImageView = _noteAToggleAccessor(_beatmapObjectsToolbarView).transform.Find("Background/Icon").GetComponent<ImageView>();
             _noteBImageView = _noteBToggleAccessor(_beatmapObjectsToolbarView).transform.Find("Background/Icon").GetComponent<ImageView>();
             _originalNoteASprite = _noteAImageView.sprite;

@@ -18,7 +18,7 @@ namespace EditorEX.Installers
             Container.BindInterfacesTo<ColorEventMarkerObjectPatch>().AsSingle();
             Container.BindInterfacesTo<ColorTypeHelperPatch>().AsSingle();
             Container.BindInterfacesTo<EventObjectViewColorHelperPatch>().AsSingle();
-            Container.BindInterfacesTo<NoteTypeHelperPatch>().AsSingle();
+            Container.BindInterfacesTo<ColorTypeEditorExtensionsPatch>().AsSingle();
 
             // Audio Spectrogram
             var colorDataType = config.SpectrogramColor switch
