@@ -16,21 +16,16 @@ namespace EditorEX.AffinityPatches
         }
 
         [AffinityPatch(typeof(ColorEventMarkerObject), "GetColorValue"), AffinityPrefix]
-        private bool GetColorValue(ref Color __result, ColorEventMarkerObject.EnvironmentColor color, float brightness)
+        private bool GetColorValue(ref Color __result, EnvironmentColorType colorType, float brightness)
         {
             if (_config.UseColorScheme)
             {
-                if (color == ColorEventMarkerObject.EnvironmentColor.Default)
+                var environmentColor = colorType switch
                 {
-                    __result = Color.gray;
-                    return false;
-                }
-                var environmentColor = color switch
-                {
-                    ColorEventMarkerObject.EnvironmentColor.Color0 => _colorManager.ColorForType(EnvironmentColorType.Color0, false),
-                    ColorEventMarkerObject.EnvironmentColor.Color1 => _colorManager.ColorForType(EnvironmentColorType.Color1, false),
-                    ColorEventMarkerObject.EnvironmentColor.ColorW => _colorManager.ColorForType(EnvironmentColorType.ColorW, false),
-                    _ => Color.white
+                    EnvironmentColorType.Color0 => _colorManager.ColorForType(EnvironmentColorType.Color0, false),
+                    EnvironmentColorType.Color1 => _colorManager.ColorForType(EnvironmentColorType.Color1, false),
+                    EnvironmentColorType.ColorW => _colorManager.ColorForType(EnvironmentColorType.ColorW, false),
+                    _ => Color.gray
                 };
                 __result = Color.Lerp(Color.gray, environmentColor, Mathf.Lerp(.3f, 1f, Mathf.Lerp(0f, 1f, brightness)));
                 return false;

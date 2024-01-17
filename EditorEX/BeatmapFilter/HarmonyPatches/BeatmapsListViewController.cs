@@ -6,6 +6,7 @@ using BeatmapEditor3D.DataModels;
 using IPA.Utilities;
 using TMPro;
 using EditorEX.BeatmapFilter;
+using System.Linq;
 
 namespace EditorEX.HarmonyPatches
 {
@@ -50,7 +51,7 @@ namespace EditorEX.HarmonyPatches
         private static void Prefix(ref int idx, BeatmapsListTableView ____beatmapsListTableView, IReadonlyBeatmapCollectionDataModel ____beatmapsCollectionDataModel)
         {
             var filteredMaps = ____beatmapsListTableView.GetField<IReadOnlyList<IBeatmapInfoData>, BeatmapsListTableView>("_beatmapInfos");
-            idx = ____beatmapsCollectionDataModel.beatmapInfos.IndexOf(filteredMaps[idx]);
+            idx = ____beatmapsCollectionDataModel.beatmapInfos.ToList().IndexOf(filteredMaps[idx]);
         }
     }
 }
