@@ -2,6 +2,7 @@
 using EditorEX.AudioSpectrogram.Colors;
 using EditorEX.AudioSpectrogram.Managers;
 using EditorEX.Managers;
+using EditorEX.UI;
 using System;
 using Zenject;
 
@@ -34,6 +35,8 @@ namespace EditorEX.Installers
             Container.BindInterfacesAndSelfTo<CustomBeatmapObjectsToolbarViewManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<EnvironmentGameObjectGroupManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<EnvironmentGameObjectManager>().AsSingle();
-        }
-    }
+
+			Container.BindInterfacesAndSelfTo<MapperInfoUI>().AsSingle();
+		}
+	}
 }
